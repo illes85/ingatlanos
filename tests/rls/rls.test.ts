@@ -250,3 +250,45 @@ describe("ingatlan-média, storage és jutalékfeltétel jogosultságok (biztons
     }
   });
 });
+
+describe("ügyfelek és gyerektáblák védelme (D-022)", () => {
+  it("az ügyfél felelőse nem állítható szervezeten kívüli profilra", async () => {
+    const { data: own } = await agent.client.from("contacts").select("id").eq("owner_agent_id", agent.userId).limit(1).single();
+    const { error } = await agent.client.from("contacts").update({ owner_agent_id: solo.userId }).eq("id", own!.id);
+    expect(error).not.toBeNull();
+    const { data: after } = await owner.client.from("contacts").select("owner_agent_id").eq("id", own!.id).single();
+    expect(after!.owner_agent_id).toBe(agent.userId);
+  });
+
+  it("az ügynök nem vehet át más ügynök ügyfelét", async () => {
+    const { data: foreign } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    const { data: updated } = await agent.client.from("contacts").update({ owner_agent_id: agent.userId }).eq("id", foreign!.id).select("id");
+    expect(updated ?? []).toHaveLength(0);
+  });
+
+  it("keresési profil és ajánlás nem hivatkozhat másik szervezet ügyfelére vagy ingatlanára", async () => {
+    const { data: kapuContact } = await owner.client.from("contacts").select("id").limit(1).single();
+    const { data: soloProperty } = await solo.client.from("properties").select("id, organization_id").limit(1).single();
+    const { data: soloContact } = await solo.client.from("contacts").select("id, organization_id").limit(1).single();
+
+    const profile = await solo.client
+      .from("search_profiles")
+      .insert({ organization_id: soloContact!.organization_id, contact_id: kapuContact!.id, transaction_type: "sale" });
+    expect(profile.error).not.toBeNull();
+
+    const recommendation = await solo.client
+      .from("property_recommendations")
+      .insert({ organization_id: soloContact!.organization_id, contact_id: soloContact!.id, property_id: (await owner.client.from("properties").select("id").limit(1).single()).data!.id });
+    expect(recommendation.error).not.toBeNull();
+    expect(soloProperty).not.toBeNull();
+  });
+
+  it("az esemény nem hivatkozhat másik szervezet ügyfelére", async () => {
+    const { data: kapuContact } = await owner.client.from("contacts").select("id").limit(1).single();
+    const { data: soloContact } = await solo.client.from("contacts").select("organization_id").limit(1).single();
+    const { error } = await solo.client
+      .from("activities")
+      .insert({ organization_id: soloContact!.organization_id, contact_id: kapuContact!.id, type: "note", title: "Kalóz" });
+    expect(error).not.toBeNull();
+  });
+});

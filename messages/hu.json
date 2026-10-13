@@ -334,6 +334,12 @@
     "transactionType": {
       "sale": "Eladó",
       "rent": "Kiadó"
+    },
+    "recommendationChannel": {
+      "email": "E-mail",
+      "sms": "SMS",
+      "phone": "Telefon",
+      "in_person": "Személyesen"
     }
   },
   "properties": {
@@ -823,6 +829,218 @@
       "carport": "Gépkocsibeálló",
       "street": "Utcán",
       "own": "Saját udvar"
+    }
+  },
+  "contacts": {
+    "title": "Ügyfelek",
+    "count": "{count} ügyfél",
+    "newContact": "Új ügyfél",
+    "searchPlaceholder": "Keresés név, telefon vagy e-mail alapján…",
+    "searchLabel": "Keresés az ügyfelek között",
+    "viewLabel": "Nézet",
+    "views": {
+      "kartya": "Kártyák",
+      "tabla": "Táblázat"
+    },
+    "sorts": {
+      "name": "név szerint",
+      "recent": "legújabb",
+      "contacted": "utolsó kapcsolat szerint"
+    },
+    "filters": {
+      "role": "Szerep",
+      "owner": "Felelős",
+      "mine": "Saját ügyfeleim",
+      "all": "Mind",
+      "clear": "Szűrők törlése",
+      "remove": "Szűrő eltávolítása: {name}"
+    },
+    "table": {
+      "name": "Név",
+      "roles": "Szerep",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "owner": "Felelős",
+      "lastContact": "Utolsó kapcsolat"
+    },
+    "lastContact": {
+      "never": "még nem volt",
+      "ago": "{count, plural, =0 {ma} =1 {tegnap} other {# napja}}"
+    },
+    "empty": {
+      "title": "Még nincs ügyfeled",
+      "body": "Vedd fel az első ügyfelet, vagy alakíts át egy érkezett leadet.",
+      "filteredTitle": "Nincs a szűrőknek megfelelő ügyfél",
+      "filteredBody": "Lazíts a szűrőkön, vagy keress másik névre."
+    },
+    "directory": {
+      "title": "Az irodában már szerepel",
+      "body": "Ezek az ügyfelek más ügynök felelősségében vannak, ezért csak a nevük és a felelős látszik.",
+      "owner": "Felelős: {name}"
+    },
+    "pagination": {
+      "label": "Lapozás",
+      "previous": "Előző",
+      "next": "Következő",
+      "page": "{page}. oldal / {pages}"
+    },
+    "detail": {
+      "breadcrumb": "Ügyfelek",
+      "edit": "Szerkesztés",
+      "actions": {
+        "call": "Hívás",
+        "email": "E-mail",
+        "sms": "SMS",
+        "showing": "Bemutató"
+      },
+      "since": "Felvéve: {date}",
+      "owner": "Felelős: {name}",
+      "company": "Cég: {name}",
+      "timeline": {
+        "title": "Idővonal",
+        "empty": "Még nincs rögzített esemény ennél az ügyfélnél.",
+        "add": "Esemény rögzítése",
+        "typeLabel": "Típus",
+        "bodyLabel": "Mi történt?",
+        "bodyPlaceholder": "Pl. Visszahívott, a hétvégén ráér a bemutatóra.",
+        "submit": "Rögzítés",
+        "types": {
+          "note": "Jegyzet",
+          "call": "Hívás",
+          "email": "E-mail",
+          "sms": "SMS"
+        },
+        "failed": "Nem sikerült rögzíteni. Próbáld újra.",
+        "saved": "Esemény rögzítve"
+      },
+      "profiles": {
+        "title": "Keresési profilok",
+        "empty": "Még nincs keresési profil. Ennek alapján ajánlunk neki ingatlant.",
+        "add": "Új keresési profil",
+        "inactive": "szünetel",
+        "rooms": "{count}+ szoba",
+        "upTo": "{amount} alatt",
+        "from": "{amount}-tól",
+        "range": "{min}–{max}",
+        "area": "{min}+ m²",
+        "mortgageApproved": "hitel jóváhagyva"
+      },
+      "recommendations": {
+        "title": "Kapott ajánlatok",
+        "empty": "Még nem kapott tőlünk ingatlanajánlatot.",
+        "reaction": {
+          "interested": "érdeklődik",
+          "not_interested": "nem érdekli",
+          "no_response": "nem válaszolt"
+        },
+        "channel": {
+          "email": "e-mail",
+          "sms": "SMS",
+          "phone": "telefon",
+          "in_person": "személyesen"
+        }
+      },
+      "matches": {
+        "title": "Neki passzoló ingatlanok",
+        "chip": "Automatikus párosítás",
+        "empty": "Jelenleg nincs olyan ingatlan, amely a keresési profilja alapján passzolna, vagy már mindet megkapta.",
+        "send": "Ajánlás rögzítése",
+        "sent": "Ajánlás rögzítve",
+        "failed": "Nem sikerült rögzíteni az ajánlást.",
+        "scoreLabel": "Egyezés: {score}%"
+      },
+      "deals": {
+        "title": "Ügyletek",
+        "empty": "Nincs hozzá kapcsolódó ügylet."
+      },
+      "properties": {
+        "title": "Eladásra kínált ingatlanai"
+      },
+      "notFound": {
+        "title": "Ez az ügyfél nem található",
+        "body": "Lehet, hogy más ügynök felelősségében van, vagy törölték."
+      }
+    },
+    "form": {
+      "titleNew": "Új ügyfél",
+      "titleEdit": "Ügyfél szerkesztése",
+      "subtitleNew": "A telefonszám és az e-mail alapján ellenőrizzük, hogy az irodában szerepel-e már.",
+      "submitNew": "Ügyfél felvétele",
+      "submitEdit": "Módosítások mentése",
+      "sections": {
+        "person": "Személyes adatok",
+        "relationship": "Kapcsolat",
+        "assignment": "Kezelés",
+        "gdpr": "Adatkezelés"
+      },
+      "fields": {
+        "lastName": "Vezetéknév",
+        "firstName": "Keresztnév",
+        "company": "Cég",
+        "email": "E-mail",
+        "phone": "Telefon",
+        "postalAddress": "Levelezési cím",
+        "roles": "Szerep",
+        "source": "Honnan érkezett",
+        "sourceDetail": "Forrás részletei",
+        "tags": "Címkék",
+        "tagsHint": "Vesszővel elválasztva, pl. VIP, hitelt intéz",
+        "notes": "Jegyzet",
+        "owner": "Felelős ügynök",
+        "gdprConsent": "Hozzájárult az adatai kezeléséhez és az ajánlatküldéshez",
+        "gdprHint": "A hozzájárulás időpontját rögzítjük. Az adatkezelési tájékoztató linkje az ügyfélnek küldött űrlapokon szerepel."
+      },
+      "duplicate": {
+        "title": "Ez az ügyfél már szerepelhet az irodában",
+        "phone": "Azonos telefonszám",
+        "email": "Azonos e-mail-cím",
+        "owner": "Felelős: {name}",
+        "continue": "Mégis új ügyfelet veszek fel"
+      },
+      "errors": {
+        "nameRequired": "Adj meg legalább egy nevet vagy céget.",
+        "email": "Adj meg érvényes e-mail-címet.",
+        "phone": "Ez a telefonszám nem értelmezhető.",
+        "choice": "Válassz a listából.",
+        "tooLong": "Ez a szöveg túl hosszú.",
+        "generic": "Nem sikerült menteni. Próbáld újra egy perc múlva.",
+        "forbidden": "Ehhez az ügyfélhez nincs módosítási jogosultságod."
+      }
+    },
+    "profileForm": {
+      "title": "Keresési profil",
+      "name": "Elnevezés",
+      "namePlaceholder": "Pl. Családi ház Gödöllőn",
+      "transaction": "Ügylet",
+      "types": "Ingatlantípusok",
+      "cities": "Települések",
+      "citiesHint": "Vesszővel elválasztva, pl. Gödöllő, Veresegyház",
+      "districts": "Budapesti kerületek",
+      "districtsHint": "Számokkal, vesszővel elválasztva, pl. 13, 14",
+      "priceMin": "Ár legalább (M Ft)",
+      "priceMax": "Ár legfeljebb (M Ft)",
+      "areaMin": "Alapterület legalább (m²)",
+      "areaMax": "Alapterület legfeljebb (m²)",
+      "roomsMin": "Szobák legalább",
+      "financing": "Finanszírozás",
+      "mortgageApproved": "A hitelbírálata kész",
+      "urgency": "Sürgősség",
+      "mustHave": "Kötelező elvárások",
+      "niceToHave": "Jó, ha van",
+      "listHint": "Vesszővel elválasztva",
+      "notes": "Megjegyzés",
+      "active": "Aktív (ajánlunk neki ingatlant)",
+      "save": "Profil mentése",
+      "cancel": "Mégse",
+      "delete": "Profil törlése",
+      "saved": "Keresési profil mentve",
+      "deleted": "Keresési profil törölve",
+      "failed": "A profil mentése nem sikerült.",
+      "deleteConfirm": "Biztosan törlöd ezt a keresési profilt?",
+      "invalid": "Ellenőrizd ezt az értéket."
+    },
+    "activity": {
+      "recommended": "Ajánlás: {address}"
     }
   }
 }
