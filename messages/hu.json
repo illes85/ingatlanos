@@ -274,6 +274,238 @@
     "mandateType": {
       "exclusive": "Kizárólagos",
       "non_exclusive": "Nem kizárólagos"
+    },
+    "leadStatus": {
+      "new": "Új",
+      "read": "Elolvasva",
+      "contacted": "Felvettük a kapcsolatot",
+      "converted": "Ügyféllé alakítva",
+      "archived": "Archivált",
+      "spam": "Spam"
+    },
+    "leadSource": {
+      "portal": "Portál",
+      "website": "Weboldal",
+      "facebook": "Facebook",
+      "phone": "Telefon",
+      "referral": "Ajánlás",
+      "manual": "Kézi felvitel",
+      "public_page": "Ingatlan-oldal"
+    },
+    "showingStatus": {
+      "scheduled": "Ütemezve",
+      "completed": "Lezajlott",
+      "cancelled": "Lemondva",
+      "no_show": "Nem jelent meg"
+    },
+    "activityType": {
+      "call": "Hívás",
+      "email": "E-mail",
+      "sms": "SMS",
+      "note": "Jegyzet",
+      "showing": "Bemutató",
+      "price_change": "Árváltozás",
+      "status_change": "Státuszváltás",
+      "document": "Dokumentum",
+      "offer": "Ajánlat",
+      "lead": "Lead",
+      "recommendation": "Ajánlás",
+      "task": "Feladat",
+      "listing": "Hirdetés"
+    },
+    "documentKind": {
+      "mandate_agreement": "Megbízási szerződés",
+      "showing_sheet": "Bemutatási lap",
+      "reservation_precontract": "Foglaló-előszerződés",
+      "pmt_form": "PMT-nyilatkozat",
+      "handover_protocol": "Átadás-átvételi jegyzőkönyv",
+      "other": "Egyéb"
+    },
+    "documentStatus": {
+      "draft": "Piszkozat",
+      "final": "Végleges",
+      "signed": "Aláírt"
+    },
+    "urgency": {
+      "low": "Nem sürgős",
+      "medium": "Közepes",
+      "high": "Sürgős"
+    }
+  },
+  "properties": {
+    "title": "Ingatlanok",
+    "count": "{count} ingatlan",
+    "newProperty": "Új ingatlan",
+    "searchPlaceholder": "Keresés cím vagy azonosító alapján…",
+    "searchLabel": "Keresés az ingatlanok között",
+    "viewLabel": "Nézet",
+    "views": {
+      "racs": "Rács",
+      "lista": "Lista",
+      "terkep": "Térkép"
+    },
+    "sortLabel": "Rendezés",
+    "sorts": {
+      "newest": "legújabb",
+      "price_asc": "ár szerint növekvő",
+      "price_desc": "ár szerint csökkenő",
+      "area_desc": "alapterület szerint",
+      "mandate": "megbízás lejárata szerint"
+    },
+    "filters": {
+      "transaction": "Ügylet",
+      "sale": "Eladó",
+      "rent": "Kiadó",
+      "status": "Állapot",
+      "statusGroups": {
+        "active": "Aktív",
+        "closed": "Lezárt",
+        "all": "Mind"
+      },
+      "type": "Típus",
+      "typeCount": "{count} típus",
+      "price": "Ár",
+      "priceMin": "Legalább (M Ft)",
+      "priceMax": "Legfeljebb (M Ft)",
+      "priceFrom": "{min}+ M Ft",
+      "priceTo": "–{max} M Ft",
+      "priceRange": "{min}–{max} M Ft",
+      "rooms": "Szobák",
+      "roomsMin": "{count}+ szoba",
+      "roomsAny": "Bármennyi",
+      "add": "Szűrő",
+      "clear": "Szűrők törlése",
+      "apply": "Alkalmaz",
+      "remove": "Szűrő eltávolítása: {name}"
+    },
+    "table": {
+      "property": "Ingatlan",
+      "type": "Típus",
+      "price": "Ár",
+      "pricePerSqm": "Ft/m²",
+      "area": "Alapterület",
+      "rooms": "Szobák",
+      "status": "Állapot",
+      "agent": "Felelős",
+      "mandate": "Megbízás"
+    },
+    "mandateExpires": "Megbízás lejár {days} nap",
+    "mandateExpired": "Megbízás lejárt",
+    "stalled": "{days} napja nem mozdult",
+    "transactionBadge": {
+      "sale": "Eladó",
+      "rent": "Kiadó"
+    },
+    "empty": {
+      "title": "Még nincs ingatlanod",
+      "body": "Vedd fel az első ingatlant: pár adat és néhány fotó elég az induláshoz.",
+      "filteredTitle": "Nincs a szűrőknek megfelelő ingatlan",
+      "filteredBody": "Lazíts a szűrőkön, vagy töröld őket."
+    },
+    "pagination": {
+      "label": "Lapozás",
+      "previous": "Előző",
+      "next": "Következő",
+      "page": "{page}. oldal / {pages}"
+    },
+    "detail": {
+      "breadcrumb": "Ingatlanok",
+      "daysOnMarket": "{count, plural, =0 {ma került piacra} other {# napja a piacon}}",
+      "actions": {
+        "share": "Megosztás",
+        "listingText": "Hirdetésszöveg",
+        "edit": "Szerkesztés"
+      },
+      "gallery": {
+        "all": "Összes fotó ({count})",
+        "empty": "Még nincs fotó",
+        "emptyHint": "A fotókat a Fotók fülön töltheted fel.",
+        "open": "Fotó megnyitása: {index}. kép",
+        "lightbox": "Fotógaléria",
+        "close": "Bezárás",
+        "previous": "Előző fotó",
+        "next": "Következő fotó",
+        "position": "{index} / {total}"
+      },
+      "summary": {
+        "perSqm": "{value} Ft/m²",
+        "marketAvg": "környéki átlag {value} Ft/m²",
+        "area": "Alapterület",
+        "rooms": "Szobák",
+        "lot": "Telek",
+        "built": "Építés",
+        "energy": "Energetika",
+        "heating": "Fűtés",
+        "floor": "Emelet",
+        "mandateUntil": "Megbízás {date}-ig",
+        "mandateDays": "{count} nap",
+        "mandateExpired": "lejárt",
+        "commissionPct": "Jutalék: {pct}% · várhatóan {amount}",
+        "commissionFixed": "Jutalék: {amount}",
+        "agent": "Felelős ügynök",
+        "owner": "Tulajdonos: {name}",
+        "scheduleShowing": "Bemutató ütemezése",
+        "valuation": "Értékbecslő riport az eladónak"
+      },
+      "tabs": {
+        "label": "Ingatlan részletei",
+        "overview": "Áttekintés",
+        "photos": "Fotók",
+        "leads": "Érdeklődők",
+        "showings": "Bemutatók",
+        "documents": "Dokumentumok",
+        "timeline": "Idővonal"
+      },
+      "stats": {
+        "views": "Megtekintés",
+        "leads": "Érdeklődő",
+        "showings": "Bemutató",
+        "rating": "Átlag értékelés",
+        "ratingValue": "{value} / 5"
+      },
+      "description": {
+        "title": "Leírás",
+        "empty": "Még nincs leírás. A Szerkesztés gombbal adhatsz meg egyet."
+      },
+      "timeline": {
+        "title": "Idővonal",
+        "empty": "Még nincs esemény ennél az ingatlannál."
+      },
+      "matches": {
+        "title": "Passzoló vevők",
+        "chip": "Automatikus párosítás",
+        "empty": "Még nincs passzoló vevő. Új keresési profil felvételekor itt jelennek meg.",
+        "rooms": "{count}+ szoba",
+        "upTo": "{amount} alatt",
+        "mortgageApproved": "hitel jóváhagyva",
+        "scoreLabel": "Egyezés: {score}%"
+      },
+      "leadsTab": {
+        "empty": "Még nem érkezett érdeklődő erre az ingatlanra.",
+        "urgent": "Sürgős"
+      },
+      "showingsTab": {
+        "empty": "Még nincs bemutató ennél az ingatlannál.",
+        "noBuyer": "Nincs vevő megadva",
+        "rating": "{value}/5"
+      },
+      "documentsTab": {
+        "empty": "Még nincs dokumentum ehhez az ingatlanhoz."
+      },
+      "photosTab": {
+        "empty": "Még nincs fotó",
+        "cover": "Borító",
+        "public": "Nyilvános oldalon is látszik",
+        "private": "Csak belső használatra"
+      },
+      "notFound": {
+        "title": "Ez az ingatlan nem található",
+        "body": "Lehet, hogy törölték, vagy nincs hozzáférésed."
+      },
+      "mandateBadge": {
+        "exclusive": "Kizárólagos megbízás",
+        "non_exclusive": "Nem kizárólagos megbízás"
+      }
     }
   },
   "placeholder": {
@@ -420,6 +652,38 @@
         "solar": "Napelem",
         "garage": "Dupla garázs"
       }
+    }
+  },
+  "lookups": {
+    "heating": {
+      "district": "Távfűtés",
+      "electric": "Elektromos",
+      "gas_condensing": "Kondenzációs gázkazán",
+      "gas_individual": "Gázcirkó",
+      "heat_pump": "Hőszivattyú",
+      "house_central": "Házközponti",
+      "none": "Nincs"
+    },
+    "material": {
+      "brick": "Tégla",
+      "panel": "Panel",
+      "wood": "Fa",
+      "none": "–"
+    },
+    "condition": {
+      "excellent": "Kiváló",
+      "good": "Jó",
+      "new": "Újépítésű",
+      "renovated": "Felújított",
+      "to_renovate": "Felújítandó",
+      "plot": "Beépítetlen"
+    },
+    "parking": {
+      "garage": "Garázs",
+      "underground": "Mélygarázs",
+      "carport": "Gépkocsibeálló",
+      "street": "Utcán",
+      "own": "Saját udvar"
     }
   }
 }

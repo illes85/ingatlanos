@@ -34,7 +34,7 @@ export async function PropertyCard({ property }: { property: RecentProperty }) {
   return (
     <Link
       href={`/ingatlanok/${property.id}`}
-      className="group flex flex-col overflow-hidden rounded-card border border-line-card bg-surface shadow-card transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-raised hover:text-ink"
+      className="group flex w-full flex-col overflow-hidden rounded-card border border-line-card bg-surface shadow-card transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-raised hover:text-ink"
     >
       <div className="relative">
         <PropertyPhoto

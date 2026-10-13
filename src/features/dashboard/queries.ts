@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import type { AppContext } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { signedCoverUrls } from "@/lib/media/signed-urls";
 import { SELLER_STAGES, isPreCloseStage } from "@/config/pipeline";
 import { planHasFeature } from "@/config/plans";
 import {
@@ -143,26 +144,6 @@ async function getCallList(supabase: Client, orgId: string, unlocked: boolean) {
   return { items, total: count ?? items.length, locked: !unlocked };
 }
 
-async function signedPhotoUrls(supabase: Client, propertyIds: string[]): Promise<Map<string, string>> {
-  const result = new Map<string, string>();
-  if (propertyIds.length === 0) return result;
-  const { data: media } = await supabase
-    .from("property_media")
-    .select("property_id, storage_path")
-    .in("property_id", propertyIds)
-    .eq("is_cover", true)
-    .not("storage_path", "is", null);
-  const paths = (media ?? []).map((m) => m.storage_path!).filter(Boolean);
-  if (paths.length === 0) return result;
-  const { data: signed } = await supabase.storage.from("property-media").createSignedUrls(paths, 3600);
-  const byPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
-  for (const m of media ?? []) {
-    const url = m.storage_path ? byPath.get(m.storage_path) : undefined;
-    if (url) result.set(m.property_id, url);
-  }
-  return result;
-}
-
 async function getShowings(supabase: Client, orgId: string, agentId: string | null, today: { start: Date; end: Date }): Promise<ShowingItem[]> {
   let query = supabase
     .from("showings")
@@ -176,7 +157,7 @@ async function getShowings(supabase: Client, orgId: string, agentId: string | nu
     .order("starts_at");
   if (agentId) query = query.eq("agent_id", agentId);
   const { data } = await query;
-  const photos = await signedPhotoUrls(supabase, [...new Set((data ?? []).map((s) => s.property_id))]);
+  const photos = await signedCoverUrls(supabase, [...new Set((data ?? []).map((s) => s.property_id))]);
 
   return (data ?? []).map((s) => {
     const p = s.property;
@@ -280,7 +261,7 @@ async function getRecentProperties(supabase: Client, orgId: string, now: Date): 
     .in("status", ["draft", ...ACTIVE_LISTING])
     .order("created_at", { ascending: false })
     .limit(3);
-  const photos = await signedPhotoUrls(supabase, (data ?? []).map((p) => p.id));
+  const photos = await signedCoverUrls(supabase, (data ?? []).map((p) => p.id));
 
   return (data ?? []).map((p) => ({
     id: p.id,
