@@ -1042,5 +1042,101 @@
     "activity": {
       "recommended": "Ajánlás: {address}"
     }
+  },
+  "leads": {
+    "title": "Leadek",
+    "newCount": "{count} új",
+    "newLead": "Új lead",
+    "tabsLabel": "Lead-állapotok",
+    "tabs": {
+      "aktiv": "Aktív",
+      "uj": "Új",
+      "atalakitott": "Ügyféllé alakítva",
+      "lezart": "Lezárt"
+    },
+    "empty": {
+      "aktiv": {
+        "title": "Nincs teendő a postaládában",
+        "body": "Minden érdeklődőt feldolgoztatok. Az új érdeklődések itt jelennek meg."
+      },
+      "uj": {
+        "title": "Nincs új lead",
+        "body": "Ha új érdeklődés érkezik, itt látod elsőként."
+      },
+      "atalakitott": {
+        "title": "Még nincs ügyféllé alakított lead",
+        "body": "Az átalakított leadek itt maradnak, az ügyfél adatlapjára mutató hivatkozással."
+      },
+      "lezart": {
+        "title": "Nincs lezárt lead",
+        "body": "Az archivált és spamként jelölt leadek itt vannak."
+      }
+    },
+    "pagination": {
+      "label": "Lapozás",
+      "previous": "Előző",
+      "next": "Következő",
+      "page": "{page}. oldal / {pages}"
+    },
+    "row": {
+      "noName": "Név nélküli érdeklődő",
+      "toggle": "{name} részletei",
+      "unread": "Olvasatlan",
+      "urgent": "Sürgős",
+      "contact": "Ügyfél:"
+    },
+    "duplicate": {
+      "title": "Egyező ügyfél az irodában:",
+      "phone": "azonos telefonszám",
+      "email": "azonos e-mail-cím",
+      "owner": "felelős: {name}"
+    },
+    "actions": {
+      "convert": "Ügyféllé alakítás",
+      "linkExisting": "Összekapcsolás a meglévővel",
+      "contacted": "Felvettük a kapcsolatot",
+      "archive": "Archiválás",
+      "spam": "Spam",
+      "restore": "Visszaállítás"
+    },
+    "assign": {
+      "label": "{name} felelőse",
+      "none": "Kiosztatlan",
+      "claim": "Magamhoz veszem",
+      "mine": "Hozzám rendelve"
+    },
+    "toast": {
+      "failed": "A művelet nem sikerült. Próbáld újra.",
+      "converted": "A lead ügyféllé alakult.",
+      "contacted": "Rögzítve: felvettük a kapcsolatot.",
+      "archived": "A lead archiválva.",
+      "spam": "A lead spamként jelölve.",
+      "restored": "A lead visszakerült az aktívak közé.",
+      "assigned": "A felelős frissítve."
+    },
+    "activity": {
+      "converted": "Leadből ügyfél lett"
+    },
+    "form": {
+      "title": "Új lead",
+      "subtitle": "Telefonos vagy személyes érdeklődés rögzítése.",
+      "fullName": "Név",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "source": "Honnan jött?",
+      "property": "Melyik ingatlan érdekli?",
+      "message": "Üzenet, megjegyzés",
+      "submit": "Lead rögzítése",
+      "errors": {
+        "required": "Add meg a nevet.",
+        "email": "Ez nem tűnik érvényes e-mail-címnek.",
+        "phone": "Ez nem tűnik érvényes telefonszámnak.",
+        "choice": "Válassz a listából.",
+        "tooLong": "Túl hosszú.",
+        "contactRequired": "Adj meg telefonszámot vagy e-mail-címet.",
+        "generic": "A mentés nem sikerült. Próbáld újra.",
+        "forbidden": "Ehhez nincs jogosultságod."
+      }
+    }
   }
 }

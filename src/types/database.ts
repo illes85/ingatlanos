@@ -2049,6 +2049,10 @@ export type Database = {
           roles: Database["public"]["Enums"]["contact_role"][]
         }[]
       }
+      convert_lead: {
+        Args: { p_activity_title?: string; p_contact?: string; p_lead: string }
+        Returns: string
+      }
       create_organization: {
         Args: {
           p_name: string

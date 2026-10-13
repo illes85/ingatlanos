@@ -292,3 +292,96 @@ describe("ügyfelek és gyerektáblák védelme (D-022)", () => {
     expect(error).not.toBeNull();
   });
 });
+
+describe("leadek védelme (D-029)", () => {
+  const created: string[] = [];
+  const newLead = async (extra: Partial<Database["public"]["Tables"]["leads"]["Insert"]> = {}) => {
+    const { data, error } = await owner.client
+      .from("leads")
+      .insert({ organization_id: kapuOrgId, full_name: "RLS Teszt Lead", phone: "+36301110000", ...extra })
+      .select("id")
+      .single();
+    expect(error).toBeNull();
+    created.push(data!.id);
+    return data!.id;
+  };
+  afterAll(async () => {
+    if (created.length > 0) await owner.client.from("leads").delete().in("id", created);
+  });
+
+  it("az ügynök a kiosztatlan leadet csak magához veheti, másnak nem oszthatja ki", async () => {
+    const id = await newLead();
+    const other = await agent.client.from("leads").update({ assigned_to: owner.userId }).eq("id", id).select("id");
+    expect(other.error).not.toBeNull();
+
+    const own = await agent.client.from("leads").update({ assigned_to: agent.userId }).eq("id", id).select("id");
+    expect(own.error).toBeNull();
+    expect(own.data).toHaveLength(1);
+  });
+
+  it("az ügynök nem látja és nem módosítja a másik ügynökhöz rendelt leadet", async () => {
+    const id = await newLead({ assigned_to: owner.userId });
+    const { data: visible } = await agent.client.from("leads").select("id").eq("id", id);
+    expect(visible ?? []).toHaveLength(0);
+    const { data: updated } = await agent.client.from("leads").update({ status: "spam" }).eq("id", id).select("id");
+    expect(updated ?? []).toHaveLength(0);
+  });
+
+  it("az asszisztens kioszthat, de szervezeten kívüli profilra senki", async () => {
+    const id = await newLead();
+    const ok = await assistant.client.from("leads").update({ assigned_to: agent.userId }).eq("id", id).select("id");
+    expect(ok.error).toBeNull();
+    expect(ok.data).toHaveLength(1);
+
+    const foreign = await owner.client.from("leads").update({ assigned_to: solo.userId }).eq("id", id).select("id");
+    expect(foreign.error).not.toBeNull();
+  });
+
+  it("a lead szervezete nem módosítható, és nem hivatkozhat másik szervezet ingatlanára vagy ügyfelére", async () => {
+    const id = await newLead();
+    const { data: soloOrg } = await solo.client.from("organizations").select("id").single();
+    const move = await owner.client.from("leads").update({ organization_id: soloOrg!.id }).eq("id", id).select("id");
+    expect(move.error).not.toBeNull();
+
+    const { data: soloProperty } = await solo.client.from("properties").select("id").limit(1).single();
+    const { data: soloContact } = await solo.client.from("contacts").select("id").limit(1).single();
+    const badProperty = await owner.client.from("leads").update({ property_id: soloProperty!.id }).eq("id", id).select("id");
+    expect(badProperty.error).not.toBeNull();
+    const badContact = await owner.client.from("leads").update({ contact_id: soloContact!.id }).eq("id", id).select("id");
+    expect(badContact.error).not.toBeNull();
+  });
+
+  it("a másik szervezet nem lát Kapu-leadet és nem hozhat létre a Kapu nevében", async () => {
+    const id = await newLead();
+    const { data } = await solo.client.from("leads").select("id").eq("id", id);
+    expect(data ?? []).toHaveLength(0);
+    const insert = await solo.client.from("leads").insert({ organization_id: kapuOrgId, full_name: "Kalóz" }).select("id");
+    expect(insert.error).not.toBeNull();
+  });
+
+  it("az átalakítás atomi, az átalakított lead nem állítható vissza, és idegen ügyfélhez nem köthető", async () => {
+    const id = await newLead({ assigned_to: agent.userId });
+    const done = await agent.client.rpc("convert_lead", { p_lead: id });
+    expect(done.error).toBeNull();
+    const contactId = done.data!;
+    const back = await agent.client.from("leads").update({ status: "new" }).eq("id", id).select("id");
+    expect(back.error).not.toBeNull();
+    const again = await agent.client.rpc("convert_lead", { p_lead: id });
+    expect(again.error).not.toBeNull();
+    await owner.client.from("activities").delete().eq("contact_id", contactId);
+    await owner.client.from("leads").delete().eq("id", id);
+    await owner.client.from("contacts").delete().eq("id", contactId);
+  });
+
+  it("az ügynök nem köthet a leadhez más ügynök ügyfelét, és nem vehet fel ügyfelet más nevében", async () => {
+    const id = await newLead({ assigned_to: agent.userId });
+    const { data: foreign } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    const link = await agent.client.from("leads").update({ contact_id: foreign!.id }).eq("id", id).select("id");
+    expect(link.error).not.toBeNull();
+    const conv = await agent.client.rpc("convert_lead", { p_lead: id, p_contact: foreign!.id });
+    expect(conv.error).not.toBeNull();
+    const created = await agent.client.from("contacts").insert({ organization_id: kapuOrgId, last_name: "Kalóz", owner_agent_id: owner.userId });
+    expect(created.error).not.toBeNull();
+  });
+});
+
