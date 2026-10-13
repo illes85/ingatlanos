@@ -29,9 +29,9 @@ export interface AppContext {
 
 /**
  * A bejelentkezett felhasználó + aktív szervezet + szerepkör. Kérésenként egyszer fut (React cache).
- * Visszatérési érték null, ha nincs bejelentkezve; 'no-org', ha még nincs szervezete.
+ * Visszatérési érték null, ha nincs bejelentkezve; 'no-org', ha még nincs szervezete; 'stale', ha a munkamenet törölt felhasználóé.
  */
-export const getAppContext = cache(async (): Promise<AppContext | null | "no-org"> => {
+export const getAppContext = cache(async (): Promise<AppContext | null | "no-org" | "stale"> => {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
@@ -42,6 +42,9 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
     .select("id, full_name, email, monthly_commission_goal, active_organization_id")
     .eq("id", userId)
     .single();
+
+  // A JWT törölt felhasználónál is érvényes marad (pl. seed újrafuttatása után): profil nélkül elavult a munkamenet.
+  if (!profile) return "stale";
 
   const { data: memberships } = await supabase
     .from("memberships")
@@ -83,6 +86,7 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
 export async function requireAppContext(): Promise<AppContext> {
   const ctx = await getAppContext();
   if (ctx === null) redirect("/belepes");
+  if (ctx === "stale") redirect("/auth/kilepes");
   if (ctx === "no-org") redirect("/szervezet-letrehozasa");
   return ctx;
 }

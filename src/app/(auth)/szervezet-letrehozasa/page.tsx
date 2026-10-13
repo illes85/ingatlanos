@@ -12,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CreateOrganizationPage() {
   const ctx = await getAppContext();
   if (ctx === null) redirect("/belepes");
+  if (ctx === "stale") redirect("/auth/kilepes");
   if (ctx !== "no-org") redirect("/ma");
 
   const t = await getTranslations("onboarding");

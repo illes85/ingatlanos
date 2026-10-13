@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
         protocol: supabaseHost.protocol.replace(":", "") as "http" | "https",
         hostname: supabaseHost.hostname,
         port: supabaseHost.port,
-        pathname: "/storage/v1/object/**",
+        pathname: "/storage/v1/**",
       },
     ],
     // A helyi Supabase a 127.0.0.1-en fut; élesben a Supabase felhő-domainje van itt.
