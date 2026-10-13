@@ -81,3 +81,18 @@ export async function getProperties(ctx: AppContext, filters: PropertyFilters, n
 
   return { items, total: count ?? items.length, pageSize: PAGE_SIZE };
 }
+
+/** A szervezet ügynökei és irodavezetői a „Felelős ügynök” választóhoz. */
+export async function getAgentOptions(ctx: AppContext): Promise<{ id: string; name: string }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("memberships")
+    .select("user_id, profile:profiles!memberships_user_id_fkey (full_name)")
+    .eq("organization_id", ctx.organization.id)
+    .eq("status", "active")
+    .in("role", ["owner", "agent"]);
+  return (data ?? [])
+    .map((m) => ({ id: m.user_id, name: m.profile?.full_name ?? "" }))
+    .filter((a) => a.name)
+    .sort((a, b) => a.name.localeCompare(b.name, "hu"));
+}

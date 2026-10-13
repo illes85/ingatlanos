@@ -330,6 +330,10 @@
       "low": "Nem sürgős",
       "medium": "Közepes",
       "high": "Sürgős"
+    },
+    "transactionType": {
+      "sale": "Eladó",
+      "rent": "Kiadó"
     }
   },
   "properties": {
@@ -505,6 +509,119 @@
       "mandateBadge": {
         "exclusive": "Kizárólagos megbízás",
         "non_exclusive": "Nem kizárólagos megbízás"
+      }
+    },
+    "activity": {
+      "created": "Ingatlan felvéve",
+      "priceDown": "Árcsökkentés {from} → {to}",
+      "priceUp": "Áremelés {from} → {to}"
+    },
+    "form": {
+      "titleNew": "Új ingatlan",
+      "titleEdit": "Ingatlan szerkesztése",
+      "subtitleNew": "Add meg az alapadatokat. A fotókat a mentés után töltheted fel.",
+      "subtitleEdit": "A módosítások az adatlapon azonnal látszanak.",
+      "submitNew": "Ingatlan felvétele",
+      "submitEdit": "Módosítások mentése",
+      "choose": "Válassz…",
+      "none": "Nincs",
+      "sections": {
+        "basics": "Alapadatok",
+        "address": "Cím",
+        "details": "Adatok",
+        "features": "Jellemzők",
+        "mandate": "Megbízás",
+        "description": "Leírás",
+        "assignment": "Kezelés"
+      },
+      "fields": {
+        "title": "Hirdetés címe",
+        "titleHint": "Pl. Családi ház kertkapcsolattal, csendes utcában",
+        "transaction": "Ügylet",
+        "type": "Ingatlantípus",
+        "subtype": "Altípus",
+        "subtypeHint": "Pl. tégla lakás, ikerház, sorház",
+        "price": "Ár (Ft)",
+        "area": "Alapterület (m²)",
+        "lot": "Telek (m²)",
+        "rooms": "Szobák",
+        "halfRooms": "Félszobák",
+        "bathrooms": "Fürdőszobák",
+        "floor": "Emelet",
+        "floorHint": "0 = földszint",
+        "buildingFloors": "Épület szintjei",
+        "elevator": "Lift van",
+        "heating": "Fűtés",
+        "material": "Építőanyag",
+        "condition": "Állapot",
+        "year": "Építés éve",
+        "energy": "Energetikai besorolás",
+        "balcony": "Erkély (m²)",
+        "terrace": "Terasz van",
+        "garden": "Kertkapcsolatos",
+        "parking": "Parkolás",
+        "utilities": "Rezsi (Ft/hó)",
+        "commonCost": "Közös költség (Ft/hó)",
+        "description": "Leírás",
+        "highlights": "Kiemelések",
+        "highlightsHint": "Vesszővel elválasztva, pl. Napelem, Dupla garázs, Csendes utca",
+        "postalCode": "Irányítószám",
+        "city": "Település",
+        "district": "Kerület",
+        "districtHint": "Csak Budapest esetén",
+        "street": "Utca",
+        "houseNumber": "Házszám",
+        "floorDoor": "Emelet / ajtó",
+        "addressVisibility": "Cím megjelenítése a nyilvános oldalon",
+        "mandateType": "Megbízás típusa",
+        "mandateStart": "Kezdete",
+        "mandateEnd": "Lejárata",
+        "commission": "Jutalék (%)",
+        "responsible": "Felelős ügynök",
+        "recordVisibility": "Láthatóság"
+      },
+      "options": {
+        "addressVisibility": {
+          "exact": "Pontos cím",
+          "street": "Csak az utca",
+          "area": "Csak a környék"
+        },
+        "recordVisibility": {
+          "office": "Iroda (mindenki látja)",
+          "private": "Csak a felelős ügynök és az irodavezető"
+        }
+      },
+      "errors": {
+        "required": "Ez a mező kötelező.",
+        "number": "Adj meg érvényes számot.",
+        "date": "Adj meg érvényes dátumot.",
+        "tooLong": "Ez a szöveg túl hosszú.",
+        "choice": "Válassz a listából.",
+        "range": "Az érték a megengedett tartományon kívül esik.",
+        "generic": "Nem sikerült menteni. Próbáld újra egy perc múlva.",
+        "forbidden": "Ehhez az ingatlanhoz nincs módosítási jogosultságod."
+      },
+      "newBanner": "Az ingatlan felvéve. Töltsd fel a fotókat, majd nézd meg az adatlapot.",
+      "toDetail": "Tovább az adatlapra",
+      "photos": {
+        "title": "Fotók",
+        "hint": "Húzd ide a képeket, vagy válaszd ki őket (JPG, PNG, WebP, legfeljebb 15 MB). Az első fotó a borító; húzással átrendezheted őket.",
+        "drop": "Képek feltöltése",
+        "dropActive": "Engedd el a képeket a feltöltéshez",
+        "uploading": "Feltöltés: {done} / {total}",
+        "uploadFailed": "Nem sikerült feltölteni: {name}",
+        "tooLarge": "{name}: legfeljebb 15 MB lehet.",
+        "badType": "{name}: csak JPG, PNG, WebP vagy AVIF kép tölthető fel.",
+        "empty": "Még nincs feltöltött fotó.",
+        "cover": "Borító",
+        "makeCover": "Beállítás borítónak",
+        "remove": "Fotó törlése",
+        "removed": "Fotó törölve",
+        "public": "Nyilvános oldalon is látszik",
+        "private": "Csak belső használatra",
+        "move": "Fotó áthelyezése: {index}. kép",
+        "saveFailed": "A módosítás nem sikerült. Próbáld újra.",
+        "needsSave": "A fotók feltöltéséhez előbb mentsd az ingatlant."
       }
     }
   },
