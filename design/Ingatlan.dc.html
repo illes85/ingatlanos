@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Kulcs – Ingatlan-adatlap</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F7F6F2}
+a{color:inherit;text-decoration:none}
+a:hover{color:#1F5C4A}
+button{font-family:inherit;cursor:pointer}
+.serif{font-family:'Fraunces',Georgia,serif;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F7F6F2; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #16181D">
+
+  <!-- OLDALSÁV (összecsukott, csak ikonok) -->
+  <nav aria-label="Fő navigáció" style="flex: 0 1 76px; box-sizing: border-box; padding: 20px 12px; background: #FBFAF7; border-right: 1px solid #E7E4DC; display: flex; flex-direction: column; align-items: center; gap: 6px">
+    <div style="width: 40px; height: 40px; margin-bottom: 18px; border-radius: 11px; background: #1F5C4A; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2 20 3"></path><path d="M16 7l3 3"></path><path d="M13.5 9.5l2 2"></path></svg>
+    </div>
+    <a href="Main.dc.html" aria-label="Ma" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3D4048"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+    <a href="Terkep.dc.html" aria-label="Ingatlanok" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #E6EFEA; color: #1F5C4A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M10 21v-4h4v4"></path></svg></a>
+    <a href="Main.dc.html" aria-label="Ügyfelek" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3D4048"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.7 3 2.5 3.5 5.2"></path></svg></a>
+    <a href="Main.dc.html" aria-label="Leadek" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3D4048"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13h5l2 3h4l2-3h5"></path><path d="M5 5h14l2 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"></path></svg></a>
+    <a href="Pipeline.dc.html" aria-label="Ügyletek" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3D4048"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"></rect><rect x="10" y="4" width="5" height="11" rx="1.5"></rect><rect x="17" y="4" width="4" height="7" rx="1.5"></rect></svg></a>
+    <a href="Main.dc.html" aria-label="Naptár" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3D4048"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></a>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <section style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 22px; max-width: 1320px; width: 100%; box-sizing: border-box">
+
+      <!-- Fejléc -->
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B6F76">
+          <a href="Terkep.dc.html" style="color: #6B6F76">Ingatlanok</a><span>/</span><span style="color: #16181D">Gödöllő, Szabadság út</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #1F5C4A; color: #FFFFFF">Hirdetve</span>
+              <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #F6E9DE; color: #9A5422">Kizárólagos megbízás</span>
+              <span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #EFEDE7; color: #3D4048">Eladó · K-1042</span>
+            </div>
+            <h1 class="serif" style="margin: 0; font-size: 38px; font-weight: 500; line-height: 1.1">Családi ház kertkapcsolattal, csendes utcában</h1>
+            <span style="font-size: 15px; color: #6B6F76">2100 Gödöllő, Szabadság út · 23 napja a piacon</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <button type="button" style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #E7E4DC; background: #FFFFFF; color: #16181D; font-size: 14px; font-weight: 600">Megosztás</button>
+            <button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #D9D3FB; background: #FFFFFF; color: #5040D9; font-size: 14px; font-weight: 600">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>Hirdetésszöveg</button>
+            <button type="button" style="height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: #16181D; color: #FFFFFF; font-size: 14px; font-weight: 600">Szerkesztés</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Galéria + összegző -->
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px">
+          <div style="flex: 2 1 340px; height: 420px; border-radius: 16px; background: #C7D2C9; display: flex; align-items: center; justify-content: center">
+            <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="rgba(22,24,29,0.25)" stroke-width="1" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path><rect x="9" y="13" width="6" height="8"></rect></svg>
+          </div>
+          <div style="flex: 1 1 200px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <div style="height: 206px; border-radius: 12px; background: #D8CFC0"></div>
+            <div style="height: 206px; border-radius: 12px; background: #CDD3D9"></div>
+            <div style="height: 206px; border-radius: 12px; background: #D6DCCF"></div>
+            <div style="position: relative; height: 206px; border-radius: 12px; background: #C9C1B4; display: flex; align-items: center; justify-content: center">
+              <button type="button" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.88); backdrop-filter: blur(8px); color: #16181D; font-size: 13px; font-weight: 700">Összes fotó (24)</button>
+            </div>
+          </div>
+        </div>
+
+        <aside style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; padding: 22px; background: #FFFFFF; border: 1px solid #ECE9E1; border-radius: 16px; box-shadow: 0 1px 2px rgba(22,24,29,0.04), 0 12px 32px rgba(22,24,29,0.06)">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span class="serif" style="font-size: 44px; font-weight: 500; line-height: 1">94,5 M Ft</span>
+            <span style="font-size: 14px; color: #6B6F76">738 000 Ft/m² · környéki átlag 702 000 Ft/m²</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Alapterület</span><span style="font-size: 15px; font-weight: 700">128 m²</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Szobák</span><span style="font-size: 15px; font-weight: 700">4 + 1</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Telek</span><span style="font-size: 15px; font-weight: 700">620 m²</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Építés</span><span style="font-size: 15px; font-weight: 700">2008</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Energetika</span><span style="font-size: 15px; font-weight: 700">BB</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: #F7F6F2"><span style="font-size: 12px; color: #6B6F76">Fűtés</span><span style="font-size: 15px; font-weight: 700">Gázcirkó</span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; border: 1px solid #F0E3D6; background: #FCF6F0">
+            <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">Megbízás 2027. jan. 14-ig</span><span style="color: #9A5422; font-weight: 600">104 nap</span></div>
+            <div style="height: 6px; border-radius: 999px; background: #F0E3D6"><div style="width: 22%; height: 100%; border-radius: 999px; background: #C8763A"></div></div>
+            <span style="font-size: 12px; color: #6B6F76">Jutalék: 3% · várhatóan 2 835 000 Ft</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div style="width: 40px; height: 40px; border-radius: 999px; background: #F6E9DE; color: #9A5422; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700">KA</div>
+            <div style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Kiss Anna</span><span style="font-size: 12px; color: #6B6F76">Felelős ügynök</span></div>
+            <span style="font-size: 12px; color: #6B6F76">Tulajdonos: Kelemen Gábor</span>
+          </div>
+          <button type="button" style="height: 48px; border-radius: 12px; border: 0; background: #1F5C4A; color: #FFFFFF; font-size: 15px; font-weight: 700">Bemutató ütemezése</button>
+          <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 12px; border: 1.5px solid #C9C0F8; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, linear-gradient(90deg, #6D5BF6, #C8763A) border-box; border-color: transparent; color: #5040D9; font-size: 15px; font-weight: 700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#5040D9" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>Értékbecslő riport az eladónak</button>
+        </aside>
+      </div>
+
+      <!-- Fülek -->
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #E7E4DC; overflow-x: auto">
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid #1F5C4A; background: transparent; color: #16181D; font-size: 14px; font-weight: 700; white-space: nowrap">Áttekintés</button>
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6F76; font-size: 14px; font-weight: 600; white-space: nowrap">Fotók</button>
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6F76; font-size: 14px; font-weight: 600; white-space: nowrap">Érdeklődők 12</button>
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6F76; font-size: 14px; font-weight: 600; white-space: nowrap">Bemutatók 5</button>
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6F76; font-size: 14px; font-weight: 600; white-space: nowrap">Dokumentumok</button>
+        <button type="button" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6F76; font-size: 14px; font-weight: 600; white-space: nowrap">Idővonal</button>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <!-- bal oszlop -->
+        <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+          <div style="display: flex; flex-wrap: wrap; gap: 12px">
+            <div style="flex: 1 1 120px; padding: 16px; border-radius: 14px; background: #FFFFFF; border: 1px solid #ECE9E1"><div style="font-size: 12px; color: #6B6F76">Megtekintés</div><div class="serif" style="font-size: 28px; font-weight: 500">1 284</div></div>
+            <div style="flex: 1 1 120px; padding: 16px; border-radius: 14px; background: #FFFFFF; border: 1px solid #ECE9E1"><div style="font-size: 12px; color: #6B6F76">Érdeklődő</div><div class="serif" style="font-size: 28px; font-weight: 500">12</div></div>
+            <div style="flex: 1 1 120px; padding: 16px; border-radius: 14px; background: #FFFFFF; border: 1px solid #ECE9E1"><div style="font-size: 12px; color: #6B6F76">Bemutató</div><div class="serif" style="font-size: 28px; font-weight: 500">5</div></div>
+            <div style="flex: 1 1 120px; padding: 16px; border-radius: 14px; background: #FFFFFF; border: 1px solid #ECE9E1"><div style="font-size: 12px; color: #6B6F76">Átlag értékelés</div><div class="serif" style="font-size: 28px; font-weight: 500">4,3 / 5</div></div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECE9E1">
+            <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Leírás</h2>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3D4048">Gödöllő csendes, kertvárosi részén, a Szabadság úton eladó ez a 2008-ban épült, 128 m²-es, 4 + 1 szobás családi ház 620 m²-es, gondozott telekkel. A nappali és a konyha közvetlenül a teraszra és a kertre nyílik. Fűtése gázcirkó, a tetőn 4 kW-os napelem. Dupla garázs, automata kapu, öntözőrendszer.</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #F3F1EC">Kertkapcsolatos</span>
+              <span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #F3F1EC">Napelem</span>
+              <span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #F3F1EC">Dupla garázs</span>
+              <span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #F3F1EC">Terasz</span>
+              <span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #F3F1EC">Csendes utca</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECE9E1">
+            <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Idővonal</h2>
+            <div style="display: flex; gap: 12px; align-items: flex-start"><span style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #E6EFEA; color: #1F5C4A; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">B</span><div style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Bemutató · Varga Bence · 5/5</span><span style="font-size: 13px; color: #6B6F76">Ma 10:00 – „A kert és a garázs nagyon tetszett, hitel rendben.”</span></div></div>
+            <div style="display: flex; gap: 12px; align-items: flex-start"><span style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #F6E9DE; color: #9A5422; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">Ár</span><div style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Árcsökkentés 97,9 → 94,5 M Ft</span><span style="font-size: 13px; color: #6B6F76">Szept. 28. · tulajdonos jóváhagyta</span></div></div>
+            <div style="display: flex; gap: 12px; align-items: flex-start"><span style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #EFEDE7; color: #3D4048; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">H</span><div style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Hirdetés feltöltve 3 portálra</span><span style="font-size: 13px; color: #6B6F76">Szept. 9.</span></div></div>
+          </div>
+        </div>
+
+        <!-- jobb: Passzoló vevők (AI) -->
+        <aside style="flex: 1 1 320px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF; border: 1px solid #E4E0F7; border-radius: 16px; box-shadow: 0 12px 32px rgba(80,64,217,0.07)">
+          <div style="height: 3px; background: linear-gradient(90deg, #6D5BF6, #C8763A)"></div>
+          <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Passzoló vevők</h2>
+              <span style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #EFEDFE; color: #5040D9"><svg width="12" height="12" viewBox="0 0 24 24" fill="#5040D9" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>AI párosítás</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Varga Bence</span><span class="serif" style="font-size: 18px; font-weight: 600; color: #1F5C4A">96%</span></div>
+              <div style="height: 6px; border-radius: 999px; background: #F0EDE6"><div style="width: 96%; height: 100%; border-radius: 999px; background: #1F5C4A"></div></div>
+              <span style="font-size: 12px; color: #6B6F76">Kert, garázs, 100 M alatt · hitel jóváhagyva</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Molnár Dóra</span><span class="serif" style="font-size: 18px; font-weight: 600; color: #1F5C4A">89%</span></div>
+              <div style="height: 6px; border-radius: 999px; background: #F0EDE6"><div style="width: 89%; height: 100%; border-radius: 999px; background: #1F5C4A"></div></div>
+              <span style="font-size: 12px; color: #6B6F76">4 szoba Gödöllőn · CSOK Plusz</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Farkas Ádám</span><span class="serif" style="font-size: 18px; font-weight: 600; color: #3D4048">81%</span></div>
+              <div style="height: 6px; border-radius: 999px; background: #F0EDE6"><div style="width: 81%; height: 100%; border-radius: 999px; background: #6B8F80"></div></div>
+              <span style="font-size: 12px; color: #6B6F76">Agglomeráció · keret 92 M Ft – kicsit felette</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Kovács Lilla</span><span class="serif" style="font-size: 18px; font-weight: 600; color: #3D4048">77%</span></div>
+              <div style="height: 6px; border-radius: 999px; background: #F0EDE6"><div style="width: 77%; height: 100%; border-radius: 999px; background: #6B8F80"></div></div>
+              <span style="font-size: 12px; color: #6B6F76">Nagy kert · lakást ad el előbb</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #F6F4FE">
+              <span style="font-size: 12px; font-weight: 700; color: #5040D9">AI JAVASLAT</span>
+              <span style="font-size: 13px; line-height: 1.5; color: #3D4048">Varga Bencének küldj ajánlatot ma: a bemutató 5/5 volt, és a hitelbírálata kész.</span>
+              <div style="display: flex; gap: 6px">
+                <button type="button" style="flex: 1; height: 40px; border-radius: 10px; border: 0; background: #1F5C4A; color: #FFFFFF; font-size: 13px; font-weight: 700">Elfogad</button>
+                <button type="button" style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E7E4DC; background: #FFFFFF; color: #16181D; font-size: 13px; font-weight: 600">Szerkeszt</button>
+                <button type="button" style="height: 40px; padding: 0 12px; border-radius: 10px; border: 0; background: transparent; color: #6B6F76; font-size: 13px; font-weight: 600">Elvet</button>
+              </div>
+            </div>
+            <button type="button" style="height: 44px; border-radius: 12px; border: 1px solid #E7E4DC; background: #FFFFFF; color: #16181D; font-size: 14px; font-weight: 600">Ajánló e-mail mind a 4 vevőnek</button>
+          </div>
+        </aside>
+      </div>
+
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1280}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

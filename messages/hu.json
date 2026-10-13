@@ -1,0 +1,425 @@
+{
+  "common": {
+    "appName": "Kulcs",
+    "loading": "Betöltés…",
+    "retry": "Újrapróbálom",
+    "undo": "Visszavonás",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "close": "Bezárás",
+    "all": "Összes",
+    "more": "Több",
+    "currencyHuf": "Ft",
+    "perSqm": "Ft/m²",
+    "rooms": "{rooms} szoba",
+    "floorN": "{floor}. emelet",
+    "groundFloor": "földszint",
+    "daysAgo": "{count, plural, =0 {ma} other {# napja}}",
+    "inMinutes": "{count} perc múlva",
+    "inHours": "{count} óra múlva",
+    "days": "{count} nap",
+    "seeAll": "Mind a {count} →",
+    "featureSoon": "Ez a funkció a következő fázisban készül el."
+  },
+  "nav": {
+    "mainLabel": "Fő navigáció",
+    "mobileLabel": "Mobil navigáció",
+    "today": "Ma",
+    "properties": "Ingatlanok",
+    "contacts": "Ügyfelek",
+    "leads": "Leadek",
+    "leadShort": "Lead",
+    "deals": "Ügyletek",
+    "calendar": "Naptár",
+    "tasks": "Feladatok",
+    "documents": "Dokumentumok",
+    "premium": "PRÉMIUM",
+    "valuation": "Értékbecslés",
+    "acquisition": "Megbízásszerzés",
+    "marketing": "Marketing stúdió",
+    "design": "Design system",
+    "expand": "Oldalsáv kinyitása",
+    "collapse": "Oldalsáv összecsukása"
+  },
+  "shell": {
+    "searchPlaceholder": "Keresés ingatlanra, ügyfélre vagy műveletre…",
+    "searchLabel": "Keresés",
+    "assistant": "Asszisztens",
+    "notifications": "Értesítések",
+    "new": "Új",
+    "newProperty": "Új ingatlan",
+    "newContact": "Új ügyfél",
+    "newLead": "Új lead",
+    "newShowing": "Új bemutató",
+    "newDeal": "Új ügylet",
+    "newTask": "Új feladat",
+    "planTrial": "{plan} próbaidő",
+    "planActive": "{plan} csomag",
+    "trialDaysLeft": "{count} nap",
+    "aiCredits": "AI kredit · {balance} / {total}",
+    "choosePlan": "Csomag kiválasztása",
+    "theme": "Téma",
+    "themeLight": "Világos",
+    "themeDark": "Sötét",
+    "themeSystem": "Rendszer",
+    "signOut": "Kijelentkezés",
+    "profile": "Profil",
+    "settings": "Beállítások",
+    "micHint": "Tartsd nyomva, és mondd el, mi történt",
+    "micLabel": "Hangjegyzet rögzítése",
+    "micRecording": "Rögzítés… engedd el a befejezéshez",
+    "micSoon": "A hangjegyzet → CRM a 3. fázisban készül el. A rögzítés felülete már működik.",
+    "quickActions": "Gyors műveletek",
+    "roles": {
+      "owner": "Irodavezető",
+      "agent": "Ügynök",
+      "assistant": "Asszisztens"
+    }
+  },
+  "palette": {
+    "placeholder": "Írj be egy nevet, címet vagy műveletet…",
+    "empty": "Nincs találat.",
+    "groupActions": "Műveletek",
+    "groupNavigation": "Ugrás",
+    "groupProperties": "Ingatlanok",
+    "groupContacts": "Ügyfelek",
+    "searching": "Keresés…",
+    "hint": "Navigálás ↑↓ · megnyitás ↵ · bezárás Esc"
+  },
+  "plans": {
+    "start": "Start",
+    "pro": "Pro",
+    "pro_ai": "Pro AI",
+    "office": "Iroda"
+  },
+  "auth": {
+    "signInTitle": "Belépés",
+    "signInSubtitle": "Üdv újra! Lépj be a munkaállomásodra.",
+    "signUpTitle": "Regisztráció",
+    "signUpSubtitle": "14 napos ingyenes Pro AI próbaidő, bankkártya nélkül.",
+    "fullName": "Teljes név",
+    "email": "E-mail-cím",
+    "password": "Jelszó",
+    "passwordHint": "Legalább 8 karakter.",
+    "signIn": "Belépés",
+    "signUp": "Fiók létrehozása",
+    "magicLink": "Belépés e-mailben kapott linkkel",
+    "magicLinkSent": "Elküldtük a belépési linket a(z) {email} címre.",
+    "google": "Folytatás Google-fiókkal",
+    "or": "vagy",
+    "noAccount": "Még nincs fiókod?",
+    "haveAccount": "Van már fiókod?",
+    "toSignUp": "Regisztrálj",
+    "toSignIn": "Lépj be",
+    "demoTitle": "Demó belépés egy kattintással",
+    "demoSubtitle": "Kapu Ingatlaniroda – valószerű magyar adatokkal",
+    "demoOwner": "Irodavezetőként",
+    "demoAgent": "Ügynökként",
+    "demoAssistant": "Asszisztensként",
+    "privacy": "A regisztrációval elfogadod az <link>adatkezelési tájékoztatót</link>.",
+    "errors": {
+      "invalidCredentials": "Hibás e-mail-cím vagy jelszó.",
+      "emailTaken": "Ezzel az e-mail-címmel már van fiók.",
+      "weakPassword": "A jelszó legyen legalább 8 karakter.",
+      "invalidEmail": "Adj meg egy érvényes e-mail-címet.",
+      "nameRequired": "Add meg a neved.",
+      "generic": "Valami nem sikerült. Próbáld újra egy perc múlva.",
+      "demoDisabled": "A demó belépés ebben a környezetben ki van kapcsolva.",
+      "callback": "A belépési link lejárt vagy érvénytelen. Kérj újat."
+    }
+  },
+  "onboarding": {
+    "title": "Hozzuk létre a munkaterületed",
+    "subtitle": "Egyedül dolgozol, vagy irodát vezetsz? Ezt később is módosíthatod.",
+    "individual": "Egyéni ügynök",
+    "individualDesc": "Saját ingatlanok és ügyfelek, egy felhasználó.",
+    "office": "Ingatlaniroda",
+    "officeDesc": "Közös állomány, csapat, irodavezetői rálátás.",
+    "nameLabelIndividual": "Hogyan jelenjen meg a neved az ügyfeleknek?",
+    "nameLabelOffice": "Az iroda neve",
+    "namePlaceholderIndividual": "pl. Kiss Anna ingatlan",
+    "namePlaceholderOffice": "pl. Kapu Ingatlaniroda",
+    "submit": "Kezdjük",
+    "trialNote": "A 14 napos Pro AI próbaidő azonnal elindul."
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Jó reggelt, {name}",
+      "day": "Szép napot, {name}",
+      "evening": "Jó estét, {name}"
+    },
+    "todoCount": "{count, plural, =0 {Ma nincs sürgős teendőd} other {# teendő vár rád ma}}",
+    "range": {
+      "label": "Időszak",
+      "today": "Ma",
+      "week": "Hét",
+      "month": "Hónap"
+    },
+    "commission": {
+      "title": "Havi jutalék",
+      "goal": "Cél: {goal}",
+      "remaining": "még {amount}",
+      "reached": "cél teljesítve"
+    },
+    "pipelineValue": {
+      "title": "Pipeline érték",
+      "trend": "{value} a múlt héthez képest"
+    },
+    "mandates": {
+      "title": "Aktív megbízások",
+      "exclusive": "ebből {count} kizárólagos"
+    },
+    "newLeads": {
+      "title": "Új leadek",
+      "urgent": "{count} sürgős, 1 órán belül",
+      "urgentShort": "{count} sürgős",
+      "none": "nincs sürgős"
+    },
+    "callList": {
+      "title": "Ma kit hívj?",
+      "chip": "AI rangsor",
+      "chipShort": "AI",
+      "call": "{name} hívása",
+      "empty": "Ma nincs kit hívnod – ez ritka luxus.",
+      "lockedPlan": "PRO AI",
+      "lockedTitle": "Tudd meg minden reggel, kit hívj először",
+      "lockedBody": "Az AI a leadjeidet a vásárlási szándék alapján rangsorolja, és megmondja, miért.",
+      "lockedCta": "Kipróbálom 14 napig"
+    },
+    "showings": {
+      "title": "Mai bemutatók",
+      "count": "{count, plural, =0 {nincs időpont} other {# időpont}}",
+      "add": "+ Bemutató rögzítése",
+      "feedbackRequested": "Lezajlott · visszajelzés kérve",
+      "completed": "Lezajlott",
+      "empty": "Ma nincs bemutatód.",
+      "next": "KÖVETKEZŐ BEMUTATÓ",
+      "navigate": "Navigáció",
+      "sheet": "Bemutatási lap"
+    },
+    "pipeline": {
+      "title": "Pipeline szakaszonként",
+      "link": "Ügyletek →",
+      "legend": "Rézszín: zárás előtti szakasz – innen jön a jutalék.",
+      "row": "{stage} · {count}"
+    },
+    "alerts": {
+      "title": "Figyelmeztetések",
+      "depositDeadline": "Foglaló határidő {when}",
+      "mandateExpires": "Megbízás {count} nap múlva lejár",
+      "stale": "{count} napja nem mozdult",
+      "extendQuestion": "{address} – hosszabbítás?",
+      "priceQuestion": "{address} – árcsökkentés?",
+      "today": "ma",
+      "tomorrow": "holnap",
+      "inDays": "{count} nap múlva",
+      "empty": "Nincs figyelmeztetés. Minden ügylet halad."
+    },
+    "recent": {
+      "title": "Legutóbbi ingatlanok",
+      "link": "Összes ingatlan →",
+      "newBadge": "Új · {days}",
+      "empty": "Még nincs ingatlanod",
+      "emptyBody": "Vidd fel az elsőt – 2 perc, és a passzoló vevőidet azonnal megmutatjuk.",
+      "emptyCta": "Ingatlan felvitele"
+    },
+    "error": "Az irányítópult adatait most nem sikerült betölteni."
+  },
+  "enums": {
+    "dealStage": {
+      "acquisition": "Akvizíció",
+      "assessment": "Felmérés",
+      "mandate_signed": "Megbízás aláírva",
+      "listed": "Hirdetve",
+      "new": "Új",
+      "needs_assessment": "Igényfelmérés",
+      "showings": "Bemutatók",
+      "offer": "Ajánlat",
+      "financing": "Hitelügyintézés",
+      "deposit": "Foglaló",
+      "contract": "Adásvétel",
+      "closed": "Lezárva"
+    },
+    "dealStageShort": {
+      "mandate_signed": "Megbízás"
+    },
+    "propertyStatus": {
+      "draft": "Előkészítés",
+      "active": "Hirdetve",
+      "under_offer": "Ajánlat érkezett",
+      "reserved": "Foglaló",
+      "sold": "Eladva",
+      "rented": "Kiadva",
+      "withdrawn": "Visszavonva",
+      "expired": "Lejárt"
+    },
+    "propertyType": {
+      "flat": "Lakás",
+      "house": "Ház",
+      "plot": "Telek",
+      "office": "Iroda",
+      "retail": "Üzlethelyiség",
+      "holiday_home": "Nyaraló"
+    },
+    "contactRole": {
+      "seller": "eladó",
+      "buyer": "vevő",
+      "tenant": "bérlő",
+      "landlord": "bérbeadó",
+      "investor": "befektető",
+      "lawyer": "ügyvéd",
+      "mortgage_broker": "hitelközvetítő",
+      "other": "egyéb"
+    },
+    "mandateType": {
+      "exclusive": "Kizárólagos",
+      "non_exclusive": "Nem kizárólagos"
+    }
+  },
+  "placeholder": {
+    "title": "{section}",
+    "body": "Ez a képernyő az 1. fázisban készül el. A keret, a navigáció és az adatok már a helyükön vannak.",
+    "back": "Vissza a Ma képernyőre"
+  },
+  "errors": {
+    "title": "Hoppá, ez nem sikerült",
+    "body": "Hiba történt a betöltés közben. Az adataid biztonságban vannak – próbáld újra.",
+    "notFoundTitle": "Ez az oldal nem létezik",
+    "notFoundBody": "Lehet, hogy elírás van a címben, vagy az oldal közben megszűnt.",
+    "home": "Vissza a kezdőlapra"
+  },
+  "designPage": {
+    "eyebrow": "DESIGN SYSTEM · v1",
+    "title": "Kulcs alapelemek",
+    "lead": "Prémium ingatlan-magazin és gyors munkaeszköz. Erdőzöld = cselekvés, réz = pénz és jutalék, ibolya = AI.",
+    "colors": "Színek",
+    "colorNames": {
+      "primary": "Primary",
+      "accent": "Accent (réz)",
+      "ai": "AI",
+      "ink": "Ink",
+      "bg": "Háttér",
+      "muted": "Muted",
+      "success": "Siker",
+      "warning": "Figyelem",
+      "danger": "Veszély",
+      "darkBg": "Sötét háttér"
+    },
+    "accentNote": "szöveg",
+    "typography": "Tipográfia",
+    "typeSamples": {
+      "priceLabel": "Fraunces 44 · ár, KPI",
+      "titleLabel": "Fraunces 32 · oldalcím",
+      "titleSample": "Jó estét, Anna",
+      "cardLabel": "Fraunces 22 · kártyacím",
+      "cardSample": "Passzoló vevők",
+      "bodyLabel": "Plus Jakarta Sans 15 · szöveg",
+      "bodySample": "A nappali és a konyha közvetlenül a teraszra és a kertre nyílik.",
+      "eyebrowLabel": "Plus Jakarta Sans 12 · címke",
+      "eyebrowSample": "KÖVETKEZŐ BEMUTATÓ",
+      "formats": "Formátum: {perSqm} · {date} · {time}"
+    },
+    "buttonsTitle": "Gombok és jelölők",
+    "buttons": {
+      "primary": "Elsődleges",
+      "secondary": "Másodlagos",
+      "ghost": "Szöveges",
+      "ai": "AI művelet",
+      "danger": "Törlés"
+    },
+    "chips": {
+      "listed": "Hirdetve",
+      "exclusive": "Kizárólagos",
+      "ai": "AI javaslat",
+      "seller": "Eladó"
+    },
+    "aging": "Napok a szakaszban (öregedés)",
+    "agingLevels": {
+      "fresh": "0–7 nap",
+      "aging": "8–14 nap",
+      "stale": "15+ nap"
+    },
+    "priceLabel": "Irányár",
+    "aiTitle": "AI javaslat",
+    "aiLabel": "HIRDETÉSSZÖVEG · ELEGÁNS HANGNEM",
+    "aiSample": "Gödöllő kertvárosi csendjében, 620 m²-es gondozott telken várja új tulajdonosát ez a 128 m²-es, napfényes családi ház, ahol a nappali egyenesen a teraszra és a kertre nyílik…",
+    "aiMissing": "Hiányzó adat: a fürdőszobák száma – megadod?",
+    "accept": "Elfogad",
+    "edit": "Szerkeszt",
+    "dismiss": "Elvet",
+    "aiRule": "Szabály: az AI semmit nem küld ki és nem ment el jóváhagyás nélkül. Generálás közben csillámló skeleton, a szöveg folyamatosan íródik ki.",
+    "lockedTitle": "Zárolt prémium funkció",
+    "emptyTitle": "Üres állapot",
+    "emptyRule": "Minden listának van üres, betöltés (skeleton) és hiba állapota.",
+    "more": {
+      "title": "Teljes komponenskészlet",
+      "lead": "Minden változat és állapot, élő komponensekből. A téma a jobb felső kapcsolóval váltható.",
+      "buttonVariants": "Gombváltozatok és méretek",
+      "badges": "Jelölők és chipek",
+      "inputs": "Beviteli mezők",
+      "inputName": "Ügyfél neve",
+      "inputNamePlaceholder": "pl. Varga Bence",
+      "inputArea": "Alapterület",
+      "inputError": "Kötelező mező",
+      "inputHint": "Csak a szám, mértékegység nélkül.",
+      "navigation": "Navigációs elemek",
+      "tabs": {
+        "overview": "Áttekintés",
+        "photos": "Fotók",
+        "leads": "Érdeklődők",
+        "showings": "Bemutatók"
+      },
+      "segmented": {
+        "grid": "Rács",
+        "list": "Lista",
+        "map": "Térkép"
+      },
+      "filters": {
+        "sale": "Eladó",
+        "county": "Pest megye",
+        "price": "40–100 M Ft",
+        "add": "+ Szűrő"
+      },
+      "data": "Adatmegjelenítés",
+      "avatars": "Avatarok",
+      "progress": "Sávok és gyűrű",
+      "states": "Állapotok",
+      "skeleton": "Betöltés (skeleton)",
+      "error": "Hibaállapot",
+      "streaming": "Streamelt AI-szöveg",
+      "regenerate": "Újragenerálás",
+      "feedback": "Visszajelzések",
+      "toastDeleted": "Ingatlan törölve",
+      "toastDeletedBody": "A K-1042 a lomtárba került.",
+      "toastRestored": "Visszaállítva",
+      "showToast": "Törlés visszavonással",
+      "openDialog": "Párbeszédablak",
+      "dialogTitle": "Megbízás lejár",
+      "dialogBody": "A szentendrei megbízás 9 nap múlva lejár. Küldjünk hosszabbítási emlékeztetőt a tulajdonosnak?",
+      "openSheet": "Oldalsó fiók",
+      "sheetTitle": "Gyors előnézet",
+      "sheetBody": "A részletek gyors megtekintése oldalsó fiókban nyílik – teljes oldal csak szükség esetén.",
+      "tooltip": "Buborék-súgó",
+      "tooltipText": "Kizárólagos megbízás",
+      "kpiExample": "Havi jutalék",
+      "matchExample": "Varga Bence",
+      "matchReason": "Kert, garázs, 100 M alatt · hitel jóváhagyva",
+      "tiles": {
+        "area": "Alapterület",
+        "rooms": "Szobák",
+        "energy": "Energetika"
+      },
+      "stageRows": {
+        "acquisition": "Akvizíció · 4",
+        "listed": "Hirdetve · 8",
+        "deposit": "Foglaló · 2"
+      },
+      "theme": "Téma",
+      "features": {
+        "garden": "Kertkapcsolatos",
+        "solar": "Napelem",
+        "garage": "Dupla garázs"
+      }
+    }
+  }
+}

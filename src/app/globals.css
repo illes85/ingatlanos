@@ -1,0 +1,382 @@
+@import "tailwindcss";
+
+/* Sötét téma: next-themes a <html> elemre .dark osztályt tesz */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   Kulcs design tokenek — forrás: design/Alapelemek.dc.html + a képernyőtervek.
+   Szerepek: erdőzöld = cselekvés, réz = pénz/jutalék/kizárólagos, ibolya→réz = AI.
+   ========================================================================== */
+:root {
+  /* felületek */
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-nav: #fbfaf7;
+  --surface-muted: #efede7;   /* szegmensváltó, kanban oszlop, semleges chip */
+  --surface-sunken: #f3f1ec;  /* sávháttér, jellemző-chip, adat-csempe */
+  --surface-tile: #f7f6f2;
+
+  /* szöveg */
+  --ink: #16181d;
+  --ink-2: #3d4048;
+  --ink-3: #4a4e56;
+  --muted: #6b6f76;
+  --on-primary: #ffffff;
+
+  /* vonalak */
+  --line: #e7e4dc;
+  --line-card: #ece9e1;
+  --line-subtle: #f0ede6;
+  --line-dashed: #c9c5bb;
+  --line-dashed-soft: #dcd8ce;
+
+  /* erdőzöld — cselekvés */
+  --primary: #1f5c4a;
+  --primary-hover: #194d3e;
+  --primary-soft: #e6efea;
+  --primary-muted: #6b8f80;
+  --primary-ring: rgb(31 92 74 / 0.12);
+
+  /* réz — pénz, jutalék, zárás előtti szakasz */
+  --accent: #c8763a;
+  --accent-soft: #f6e9de;
+  --accent-text: #9a5422;
+  --accent-tint: #fcf6f0;
+  --accent-border: #f0e3d6;
+  --ring-track: #f3ede5;
+
+  /* AI — ibolya→réz */
+  --ai-from: #6d5bf6;
+  --ai-to: #c8763a;
+  --ai-soft: #efedfe;
+  --ai-surface: #f6f4fe;
+  --ai-border: #e4e0f7;
+  --ai-border-strong: #d9d3fb;
+  --ai-text: #5040d9;
+  --ai-solid: #5040d9;
+
+  /* státuszok */
+  --success: #2e8b57;
+  --success-text: #23704a;
+  --warning: #d9962b;
+  --warning-soft: #fbf1df;
+  --warning-text: #8a5a0b;
+  --danger: #c2453b;
+  --danger-soft: #fbecea;
+  --danger-text: #a8352c;
+  --danger-border: #e8b4ae;
+
+  /* semleges-hideg avatar tónus */
+  --slate-soft: #e9ecf1;
+  --slate-text: #3d4a5c;
+
+  /* inverz (sötét) kártya — csomag/kredit, mobil jutalék */
+  --inverse: #16181d;
+  --inverse-text: #ffffff;
+  --inverse-muted: #b9bcc3;
+  --inverse-track: #33363d;
+  --inverse-ai-from: #8b7bff;
+  --inverse-ai-to: #e09a5f;
+
+  /* üveg */
+  --glass: rgb(255 255 255 / 0.78);
+  --glass-strong: rgb(255 255 255 / 0.86);
+  --glass-border: rgb(255 255 255 / 0.7);
+
+  /* árnyékok — puha, többrétegű */
+  --elev-card: 0 1px 2px rgb(22 24 29 / 0.04), 0 8px 24px rgb(22 24 29 / 0.04);
+  --elev-raised: 0 1px 2px rgb(22 24 29 / 0.04), 0 12px 32px rgb(22 24 29 / 0.06);
+  --elev-ai: 0 1px 2px rgb(22 24 29 / 0.04), 0 12px 32px rgb(80 64 217 / 0.07);
+  --elev-glass: 0 8px 24px rgb(22 24 29 / 0.1);
+  --elev-popover: 0 12px 32px rgb(22 24 29 / 0.12);
+  --elev-chip: 0 1px 2px rgb(22 24 29 / 0.08);
+  --elev-fab: 0 10px 24px rgb(31 92 74 / 0.4);
+  --elev-selected: 0 12px 28px rgb(31 92 74 / 0.14);
+
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0e1013;
+  --surface: #16191e;
+  --surface-nav: #121418;
+  --surface-muted: #1e2228;
+  --surface-sunken: #1b1f24;
+  --surface-tile: #1b1f24;
+
+  --ink: #ecedef;
+  --ink-2: #c9ccd2;
+  --ink-3: #b4b8bf;
+  --muted: #9a9fa8;
+  --on-primary: #0e1013;
+
+  --line: #262a31;
+  --line-card: #23272d;
+  --line-subtle: #1f2328;
+  --line-dashed: #3a3f47;
+  --line-dashed-soft: #30353c;
+
+  --primary: #3fa585;
+  --primary-hover: #4fb594;
+  --primary-soft: #173d33;
+  --primary-muted: #4f7f6f;
+  --primary-ring: rgb(63 165 133 / 0.22);
+
+  --accent: #e09a5f;
+  --accent-soft: #3a2a1e;
+  --accent-text: #e9b48a;
+  --accent-tint: #241c16;
+  --accent-border: #4a3626;
+  --ring-track: #2b2520;
+
+  --ai-from: #8b7bff;
+  --ai-to: #e09a5f;
+  --ai-soft: #25214a;
+  --ai-surface: #1c1a33;
+  --ai-border: #332e5c;
+  --ai-border-strong: #433c78;
+  --ai-text: #b3a9ff;
+  --ai-solid: #6d5bf6;
+
+  --success: #3fa56f;
+  --success-text: #6cc79a;
+  --warning: #e0a94a;
+  --warning-soft: #33280f;
+  --warning-text: #ebc27a;
+  --danger: #e0645a;
+  --danger-soft: #3a1c1a;
+  --danger-text: #f0948c;
+  --danger-border: #6b302b;
+
+  --slate-soft: #232a35;
+  --slate-text: #b7c3d6;
+
+  --inverse: #22262d;
+  --inverse-text: #ecedef;
+  --inverse-muted: #a3a8b0;
+  --inverse-track: #3a3f47;
+
+  --glass: rgb(22 25 30 / 0.78);
+  --glass-strong: rgb(22 25 30 / 0.86);
+  --glass-border: rgb(255 255 255 / 0.08);
+
+  /* sötétben árnyék helyett finom keret (lásd .elevated) */
+  --elev-card: 0 0 0 0 transparent;
+  --elev-raised: 0 0 0 0 transparent;
+  --elev-ai: 0 0 0 0 transparent;
+  --elev-glass: 0 8px 24px rgb(0 0 0 / 0.35);
+  --elev-popover: 0 12px 32px rgb(0 0 0 / 0.45);
+  --elev-chip: 0 0 0 1px var(--line);
+  --elev-fab: 0 10px 24px rgb(0 0 0 / 0.45);
+  --elev-selected: 0 0 0 0 transparent;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-tile: var(--surface-tile);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-muted: var(--muted);
+  --color-on-primary: var(--on-primary);
+  --color-line: var(--line);
+  --color-line-card: var(--line-card);
+  --color-line-subtle: var(--line-subtle);
+  --color-line-dashed: var(--line-dashed);
+  --color-line-dashed-soft: var(--line-dashed-soft);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-muted: var(--primary-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-border: var(--accent-border);
+  --color-ring-track: var(--ring-track);
+  --color-ai-from: var(--ai-from);
+  --color-ai-to: var(--ai-to);
+  --color-ai-soft: var(--ai-soft);
+  --color-ai-surface: var(--ai-surface);
+  --color-ai-border: var(--ai-border);
+  --color-ai-border-strong: var(--ai-border-strong);
+  --color-ai-text: var(--ai-text);
+  --color-ai-solid: var(--ai-solid);
+  --color-success: var(--success);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-text: var(--danger-text);
+  --color-danger-border: var(--danger-border);
+  --color-slate-soft: var(--slate-soft);
+  --color-slate-text: var(--slate-text);
+  --color-inverse: var(--inverse);
+  --color-inverse-text: var(--inverse-text);
+  --color-inverse-muted: var(--inverse-muted);
+  --color-inverse-track: var(--inverse-track);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-border: var(--glass-border);
+
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+
+  /* betűméret-skála a tervből (spec: 12/14/16/20/24/32/44 + a terv köztes méretei) */
+  --text-11: 11px;
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-18: 18px;
+  --text-20: 20px;
+  --text-22: 22px;
+  --text-24: 24px;
+  --text-28: 28px;
+  --text-32: 32px;
+  --text-34: 34px;
+  --text-38: 38px;
+  --text-44: 44px;
+  --text-48: 48px;
+
+  /* lekerekítések */
+  --radius-kbd: 6px;
+  --radius-seg: 9px;
+  --radius-control: 10px;
+  --radius-tile: 12px;
+  --radius-panel: 14px;
+  --radius-card: 16px;
+  --radius-card-lg: 18px;
+  --radius-map: 20px;
+
+  --shadow-card: var(--elev-card);
+  --shadow-raised: var(--elev-raised);
+  --shadow-ai: var(--elev-ai);
+  --shadow-glass: var(--elev-glass);
+  --shadow-popover: var(--elev-popover);
+  --shadow-chip: var(--elev-chip);
+  --shadow-fab: var(--elev-fab);
+  --shadow-selected: var(--elev-selected);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-ai-spin: ai-spin 3s linear infinite;
+  --animate-page-in: page-in 220ms var(--ease-out) both;
+
+}
+
+/* Keyframe-ek a @theme-en kívül, hogy utility nélkül (pl. .ai-border:hover) is elérhetők legyenek */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes ai-spin {
+  from { --ai-angle: 90deg; }
+  to { --ai-angle: 450deg; }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@property --ai-angle {
+  syntax: "<angle>";
+  initial-value: 90deg;
+  inherits: false;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--primary-soft);
+  }
+}
+
+@layer components {
+  /* Fraunces: címek és nagy számok, tabuláris számjegyekkel */
+  .serif {
+    font-family: var(--font-serif);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    font-optical-sizing: auto;
+  }
+
+  /* Kártya keret + árnyék; sötétben csak keret */
+  .elevated {
+    border: 1px solid var(--line-card);
+    box-shadow: var(--elev-card);
+  }
+
+  /* AI átmenetes keret (ibolya→réz); hoverre a keret lassan „körbefut” */
+  .ai-border {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(90deg, var(--ai-from), var(--ai-to)) border-box;
+  }
+  .ai-border:hover {
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      conic-gradient(from var(--ai-angle), var(--ai-from), var(--ai-to), var(--ai-from)) border-box;
+    animation: ai-spin 3s linear infinite;
+  }
+  .ai-stripe {
+    background: linear-gradient(90deg, var(--ai-from), var(--ai-to));
+  }
+
+  /* Üveghatás — csak lebegő elemeken */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--elev-glass);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-sunken) 0%, var(--line-subtle) 50%, var(--surface-sunken) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+  .skeleton-ai {
+    background: linear-gradient(90deg, var(--ai-soft) 0%, var(--ai-surface) 50%, var(--ai-soft) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

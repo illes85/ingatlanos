@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Kulcs – Alapelemek</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F5C4A}
+a:hover{color:#16181D}
+button{font-family:inherit;cursor:pointer}
+.serif{font-family:'Fraunces',Georgia,serif;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1180px; box-sizing: border-box; padding: 56px; background: #F7F6F2; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #16181D; display: flex; flex-direction: column; gap: 32px">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #6B6F76">DESIGN SYSTEM · v1</span>
+      <h1 class="serif" style="margin: 0; font-size: 48px; font-weight: 500">Kulcs alapelemek</h1>
+    </div>
+    <span style="max-width: 460px; font-size: 14px; line-height: 1.5; color: #6B6F76; text-align: right">Prémium ingatlan-magazin és gyors munkaeszköz. Erdőzöld = cselekvés, réz = pénz és jutalék, ibolya = AI.</span>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+
+    <!-- Színek -->
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Színek</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #1F5C4A"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Primary</span><span style="font-size: 12px; color: #6B6F76">#1F5C4A</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #C8763A"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Accent (réz)</span><span style="font-size: 12px; color: #6B6F76">#C8763A · szöveg #9A5422</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #6D5BF6, #C8763A)"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">AI</span><span style="font-size: 12px; color: #6B6F76">#6D5BF6 → #C8763A</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #16181D"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Ink</span><span style="font-size: 12px; color: #6B6F76">#16181D</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #F7F6F2; border: 1px solid #E7E4DC; box-sizing: border-box"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Háttér</span><span style="font-size: 12px; color: #6B6F76">#F7F6F2</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #6B6F76"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Muted</span><span style="font-size: 12px; color: #6B6F76">#6B6F76</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #2E8B57"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Siker</span><span style="font-size: 12px; color: #6B6F76">#2E8B57</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #D9962B"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Figyelem</span><span style="font-size: 12px; color: #6B6F76">#D9962B</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #C2453B"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Veszély</span><span style="font-size: 12px; color: #6B6F76">#C2453B</span></div></div>
+        <div style="display: flex; gap: 10px; align-items: center"><span style="width: 44px; height: 44px; border-radius: 10px; background: #0E1013"></span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Sötét háttér</span><span style="font-size: 12px; color: #6B6F76">#0E1013</span></div></div>
+      </div>
+    </div>
+
+    <!-- Tipográfia -->
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Tipográfia</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #6B6F76">Fraunces 44 · ár, KPI</span><span class="serif" style="font-size: 44px; font-weight: 500; line-height: 1.05">94,5 M Ft</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #6B6F76">Fraunces 32 · oldalcím</span><span class="serif" style="font-size: 32px; font-weight: 500">Jó estét, Anna</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #6B6F76">Fraunces 22 · kártyacím</span><span class="serif" style="font-size: 22px; font-weight: 500">Passzoló vevők</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #6B6F76">Plus Jakarta Sans 15 · szöveg</span><span style="font-size: 15px; line-height: 1.6; color: #3D4048">A nappali és a konyha közvetlenül a teraszra és a kertre nyílik.</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #6B6F76">Plus Jakarta Sans 12 · címke</span><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #6B6F76">KÖVETKEZŐ BEMUTATÓ</span></div>
+      <span style="margin-top: auto; font-size: 13px; color: #6B6F76">Formátum: 1 250 000 Ft/m² · 2026. október 2. · 13:30</span>
+    </div>
+
+    <!-- Gombok + chipek -->
+    <div style="display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Gombok és jelölők</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px">
+        <button type="button" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #1F5C4A; color: #FFFFFF; font-size: 14px; font-weight: 700">Elsődleges</button>
+        <button type="button" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #E7E4DC; background: #FFFFFF; color: #16181D; font-size: 14px; font-weight: 600">Másodlagos</button>
+        <button type="button" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: transparent; color: #3D4048; font-size: 14px; font-weight: 600">Szöveges</button>
+        <button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; border: 1.5px solid transparent; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, linear-gradient(90deg, #6D5BF6, #C8763A) border-box; color: #5040D9; font-size: 14px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="#5040D9" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>AI művelet</button>
+        <button type="button" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #FBECEA; color: #A8352C; font-size: 14px; font-weight: 700">Törlés</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #1F5C4A; color: #FFFFFF">Hirdetve</span>
+        <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #F6E9DE; color: #9A5422">Kizárólagos</span>
+        <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #EFEDFE; color: #5040D9">✦ AI javaslat</span>
+        <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #EFEDE7; color: #3D4048">Eladó</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 12px; color: #6B6F76">Napok a szakaszban (öregedés)</span>
+        <div style="display: flex; gap: 8px">
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #E6EFEA; color: #1F5C4A">0–7 nap</span>
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #FBF1DF; color: #8A5A0B">8–14 nap</span>
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #FBECEA; color: #A8352C">15+ nap</span>
+        </div>
+      </div>
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Irányár
+        <span style="display: flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; border: 1.5px solid #1F5C4A; background: #FFFFFF; box-shadow: 0 0 0 4px rgba(31,92,74,0.12)"><input type="text" value="94 500 000" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 15px; font-weight: 500; color: #16181D"><span style="font-size: 14px; color: #6B6F76">Ft</span></span>
+      </label>
+    </div>
+
+    <!-- AI javaslat blokk -->
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">AI javaslat</h2>
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: #F6F4FE; border: 1px solid #E4E0F7">
+        <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #5040D9"><svg width="12" height="12" viewBox="0 0 24 24" fill="#5040D9" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>HIRDETÉSSZÖVEG · ELEGÁNS HANGNEM</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3D4048">Gödöllő kertvárosi csendjében, 620 m²-es gondozott telken várja új tulajdonosát ez a 128 m²-es, napfényes családi ház, ahol a nappali egyenesen a teraszra és a kertre nyílik…</p>
+        <span style="font-size: 12px; color: #6B6F76">Hiányzó adat: a fürdőszobák száma – megadod?</span>
+        <div style="display: flex; gap: 6px">
+          <button type="button" style="flex: 1; height: 40px; border-radius: 10px; border: 0; background: #1F5C4A; color: #FFFFFF; font-size: 13px; font-weight: 700">Elfogad</button>
+          <button type="button" style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E7E4DC; background: #FFFFFF; color: #16181D; font-size: 13px; font-weight: 600">Szerkeszt</button>
+          <button type="button" style="height: 40px; padding: 0 12px; border-radius: 10px; border: 0; background: transparent; color: #6B6F76; font-size: 13px; font-weight: 600">Elvet</button>
+        </div>
+      </div>
+      <span style="font-size: 13px; line-height: 1.5; color: #6B6F76">Szabály: az AI semmit nem küld ki és nem ment el jóváhagyás nélkül. Generálás közben csillámló skeleton, a szöveg folyamatosan íródik ki.</span>
+    </div>
+
+    <!-- Zárolt prémium -->
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Zárolt prémium funkció</h2>
+      <div style="position: relative; height: 300px; border-radius: 14px; overflow: hidden; background: #F7F6F2; border: 1px solid #ECE9E1">
+        <div style="position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; gap: 10px; filter: blur(5px); opacity: 0.7">
+          <div style="height: 18px; width: 60%; border-radius: 6px; background: #D9D5CC"></div>
+          <div style="height: 44px; border-radius: 10px; background: #E6EFEA"></div>
+          <div style="height: 44px; border-radius: 10px; background: #E6EFEA"></div>
+          <div style="height: 44px; border-radius: 10px; background: #F6E9DE"></div>
+          <div style="height: 44px; border-radius: 10px; background: #EFEDFE"></div>
+        </div>
+        <div style="position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); box-shadow: 0 12px 32px rgba(22,24,29,0.12)">
+          <span style="font-size: 12px; font-weight: 700; color: #9A5422">PRO AI</span>
+          <span style="font-size: 15px; font-weight: 700">Tudd meg minden reggel, kit hívj először</span>
+          <span style="font-size: 13px; line-height: 1.5; color: #4A4E56">Az AI a leadjeidet a vásárlási szándék alapján rangsorolja, és megmondja, miért.</span>
+          <button type="button" style="height: 44px; border-radius: 10px; border: 0; background: #16181D; color: #FFFFFF; font-size: 14px; font-weight: 700">Kipróbálom 14 napig</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Üres állapot -->
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE9E1">
+      <h2 class="serif" style="margin: 0; font-size: 22px; font-weight: 500">Üres állapot</h2>
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; border-radius: 14px; border: 1.5px dashed #DCD8CE; text-align: center">
+        <svg width="88" height="72" viewBox="0 0 88 72" fill="none" stroke="#9AA39C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 64h68"></path><path d="M20 64V34l24-18 24 18v30"></path><rect x="38" y="44" width="12" height="20"></rect><path d="M60 14l4-4M66 20l6-2M54 10l1-6"></path></svg>
+        <span style="font-size: 16px; font-weight: 700">Még nincs ingatlanod</span>
+        <span style="max-width: 260px; font-size: 13px; line-height: 1.5; color: #6B6F76">Vidd fel az elsőt – 2 perc, és a passzoló vevőidet azonnal megmutatjuk.</span>
+        <button type="button" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #1F5C4A; color: #FFFFFF; font-size: 14px; font-weight: 700">Ingatlan felvitele</button>
+      </div>
+      <span style="font-size: 13px; color: #6B6F76">Minden listának van üres, betöltés (skeleton) és hiba állapota.</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
