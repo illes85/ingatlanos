@@ -36,6 +36,8 @@ export default async function EditPropertyPage({
     .filter((m) => m.kind === "photo" && m.url)
     .map((m) => ({ id: m.id, url: m.url!, isCover: m.isCover, isPublic: m.isPublic, caption: m.caption }));
   const justCreated = query.uj === "1";
+  // Felelős, láthatóság és jutalék: az irodavezető vagy a jelenlegi felelős joga (az adatbázis is ezt érvényesíti).
+  const canAssign = ctx.role === "owner" || detail.property.responsible_agent_id === ctx.userId;
 
   return (
     <div className="flex max-w-[1100px] flex-col gap-6 p-5 md:p-8">
@@ -68,7 +70,8 @@ export default async function EditPropertyPage({
         propertyId={id}
         defaults={propertyToFormValues(detail.property, detail.commission?.pct ?? null)}
         agents={agents}
-        canEditCommission={ctx.role !== "assistant"}
+        canEditCommission={canAssign && ctx.role !== "assistant"}
+        canAssign={canAssign}
       />
     </div>
   );

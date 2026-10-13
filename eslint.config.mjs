@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // A MapLibre háttérszálának másolata (scripts/dev/copy-maplibre-worker.mjs), nem a mi kódunk.
+    "public/maplibre/**",
   ]),
 ]);
 

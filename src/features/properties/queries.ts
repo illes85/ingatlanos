@@ -10,7 +10,13 @@ const LIST_COLUMNS =
   "id, code, title, transaction_type, subtype, price, price_per_sqm, area_sqm, rooms, half_rooms, floor, property_type, energy_rating, status, status_changed_at, listed_at, created_at, mandate_type, mandate_expires_at, city, district, street, lat, lng, responsible:profiles!properties_responsible_agent_id_fkey (full_name)";
 
 /** Az ingatlanlista a felhasználó munkamenetével, RLS alatt. A szűrés és a rendezés az adatbázisban történik. */
-export async function getProperties(ctx: AppContext, filters: PropertyFilters, now = new Date()): Promise<PropertyListResult> {
+export async function getProperties(
+  ctx: AppContext,
+  filters: PropertyFilters,
+  now = new Date(),
+  /** A térképnézet lapozás nélkül, egy nagyobb kötegben kéri az ingatlanokat. */
+  options: { limit?: number } = {},
+): Promise<PropertyListResult> {
   const supabase = await createClient();
   let query = supabase
     .from("properties")
@@ -47,8 +53,9 @@ export async function getProperties(ctx: AppContext, filters: PropertyFilters, n
       query = query.order("created_at", { ascending: false });
   }
 
-  const from = (filters.page - 1) * PAGE_SIZE;
-  const { data, count } = await query.range(from, from + PAGE_SIZE - 1);
+  const pageSize = options.limit ?? PAGE_SIZE;
+  const from = options.limit ? 0 : (filters.page - 1) * pageSize;
+  const { data, count } = await query.range(from, from + pageSize - 1);
   const rows = data ?? [];
   const photos = await signedCoverUrls(supabase, rows.map((p) => p.id));
 
@@ -79,7 +86,7 @@ export async function getProperties(ctx: AppContext, filters: PropertyFilters, n
     lng: p.lng,
   }));
 
-  return { items, total: count ?? items.length, pageSize: PAGE_SIZE };
+  return { items, total: count ?? items.length, pageSize };
 }
 
 /** A szervezet ügynökei és irodavezetői a „Felelős ügynök” választóhoz. */

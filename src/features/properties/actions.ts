@@ -14,6 +14,11 @@ export interface PropertyFormState {
 
 export type MediaActionResult = { ok: true } | { ok: false; error: "generic" | "forbidden" | "invalidPath" };
 
+/** A feltöltött fájl útvonala: {szervezet}/{ingatlan}/{uuid}.{kiterjesztés}, semmi más. */
+function isValidMediaPath(path: unknown, orgId: string, propertyId: string): path is string {
+  return typeof path === "string" && new RegExp(`^${orgId}/${propertyId}/[0-9a-f-]{36}\\.(jpg|png|webp|avif)$`, "i").test(path);
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** A kezdő ügyletszakasz felvételkor: az ingatlan státusza ebből származik (D-007). */
 const INITIAL_DEAL_PROBABILITY = 10;
@@ -21,7 +26,8 @@ const INITIAL_DEAL_PROBABILITY = 10;
 /** Jutalékfeltétel mentése; az asszisztens szerepkörnek az RLS miatt nincs hozzáférése, ezért nála kihagyjuk. */
 async function saveCommission(supabase: Awaited<ReturnType<typeof createClient>>, orgId: string, propertyId: string, pct: number | undefined) {
   if (pct === undefined) {
-    await supabase.from("property_commission_terms").delete().eq("property_id", propertyId);
+    // Üres mező: csak a százalékot töröljük, a fix összeg és a megjegyzés megmarad.
+    await supabase.from("property_commission_terms").update({ commission_pct: null }).eq("property_id", propertyId);
     return;
   }
   await supabase.from("property_commission_terms").upsert({ property_id: propertyId, organization_id: orgId, commission_pct: pct });
@@ -42,7 +48,7 @@ export async function createProperty(_: PropertyFormState, formData: FormData): 
     .single();
   if (error || !created) return { error: "generic" };
 
-  if (ctx.role !== "assistant") await saveCommission(supabase, ctx.organization.id, created.id, input.commissionPct);
+  if (ctx.role === "owner" || responsible === ctx.userId) await saveCommission(supabase, ctx.organization.id, created.id, input.commissionPct);
 
   // Az eladói ügylet az akvizíciós szakaszban indul; a kanbanon innen vihető tovább.
   await supabase.from("deals").insert({
@@ -77,9 +83,14 @@ export async function updateProperty(propertyId: string, _: PropertyFormState, f
   const { data: before } = await supabase.from("properties").select("price").eq("id", propertyId).eq("organization_id", ctx.organization.id).maybeSingle();
   if (!before) return { error: "forbidden" };
 
+  // A felelős és a láthatóság mezői csak annak jelennek meg, aki váltathatja; ha hiányoznak, nem érintjük őket.
+  const row = toPropertyRow(input);
+  if (!formData.has("responsibleAgentId")) delete row.responsible_agent_id;
+  if (!formData.has("visibility")) delete row.visibility;
+
   const { data: updated, error } = await supabase
     .from("properties")
-    .update(toPropertyRow(input))
+    .update(row)
     .eq("id", propertyId)
     .eq("organization_id", ctx.organization.id)
     .select("id");
@@ -87,7 +98,7 @@ export async function updateProperty(propertyId: string, _: PropertyFormState, f
   if (error) return { error: "generic" };
   if (!updated || updated.length === 0) return { error: "forbidden" };
 
-  if (ctx.role !== "assistant") await saveCommission(supabase, ctx.organization.id, propertyId, input.commissionPct);
+  if (formData.has("commissionPct")) await saveCommission(supabase, ctx.organization.id, propertyId, input.commissionPct);
 
   const oldPrice = Number(before.price);
   if (input.price !== undefined && input.price !== oldPrice) {
@@ -111,8 +122,7 @@ export async function updateProperty(propertyId: string, _: PropertyFormState, f
 export async function addPropertyMedia(propertyId: string, files: { path: string; width?: number; height?: number }[]): Promise<MediaActionResult> {
   const ctx = await requireAppContext();
   if (!UUID.test(propertyId) || files.length === 0 || files.length > 30) return { ok: false, error: "generic" };
-  const prefix = `${ctx.organization.id}/${propertyId}/`;
-  if (files.some((f) => !f.path.startsWith(prefix) || f.path.includes(".."))) return { ok: false, error: "invalidPath" };
+  if (files.some((f) => !isValidMediaPath(f?.path, ctx.organization.id, propertyId))) return { ok: false, error: "invalidPath" };
 
   const supabase = await createClient();
   const { data: property } = await supabase.from("properties").select("id").eq("id", propertyId).eq("organization_id", ctx.organization.id).maybeSingle();
@@ -151,9 +161,16 @@ export async function deletePropertyMedia(propertyId: string, mediaId: string): 
     .maybeSingle();
   if (!media) return { ok: false, error: "forbidden" };
 
-  if (media.storage_path) await supabase.storage.from("property-media").remove([media.storage_path]);
-  const { error } = await supabase.from("property_media").delete().eq("id", mediaId);
+  // Előbb a sor törlődik: az RLS csendben kihagyja, amit nem szabad törölni (üres találat = nincs jogosultság).
+  const { data: removed, error } = await supabase.from("property_media").delete().eq("id", mediaId).select("id");
   if (error) return { ok: false, error: "generic" };
+  if (!removed || removed.length === 0) return { ok: false, error: "forbidden" };
+
+  // A fájlt csak akkor töröljük, ha más sor már nem hivatkozik rá (a demó képkészlete közös).
+  if (media.storage_path) {
+    const { count } = await supabase.from("property_media").select("id", { count: "exact", head: true }).eq("storage_path", media.storage_path);
+    if (!count) await supabase.storage.from("property-media").remove([media.storage_path]);
+  }
 
   if (media.is_cover) {
     const { data: next } = await supabase.from("property_media").select("id").eq("property_id", propertyId).order("sort_order").limit(1).maybeSingle();
@@ -168,8 +185,7 @@ export async function setCoverMedia(propertyId: string, mediaId: string): Promis
   const supabase = await createClient();
   const { data: media } = await supabase.from("property_media").select("id").eq("id", mediaId).eq("property_id", propertyId).eq("organization_id", ctx.organization.id).maybeSingle();
   if (!media) return { ok: false, error: "forbidden" };
-  await supabase.from("property_media").update({ is_cover: false }).eq("property_id", propertyId).neq("id", mediaId);
-  const { error } = await supabase.from("property_media").update({ is_cover: true }).eq("id", mediaId);
+  const { error } = await supabase.rpc("set_property_cover", { p_property: propertyId, p_media: mediaId });
   return error ? { ok: false, error: "generic" } : { ok: true };
 }
 

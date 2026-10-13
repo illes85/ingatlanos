@@ -2066,6 +2066,10 @@ export type Database = {
           owner_name: string
         }[]
       }
+      set_property_cover: {
+        Args: { p_media: string; p_property: string }
+        Returns: undefined
+      }
       write_audit: {
         Args: {
           p_action: string

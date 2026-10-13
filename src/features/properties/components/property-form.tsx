@@ -77,6 +77,8 @@ interface PropertyFormProps {
   defaults?: PropertyFormValues;
   agents: { id: string; name: string }[];
   canEditCommission: boolean;
+  /** Felelős és láthatóság váltása: az irodavezető vagy a jelenlegi felelős joga. */
+  canAssign?: boolean;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -98,7 +100,7 @@ function Check({ name, label, defaultChecked }: { name: string; label: string; d
 }
 
 /** Ingatlan felvételi és szerkesztő űrlap. A validáció szerveren fut; a hibák mezőnként jelennek meg. */
-export function PropertyForm({ mode, propertyId, defaults = EMPTY_PROPERTY_VALUES, agents, canEditCommission }: PropertyFormProps) {
+export function PropertyForm({ mode, propertyId, defaults = EMPTY_PROPERTY_VALUES, agents, canEditCommission, canAssign = true }: PropertyFormProps) {
   const t = useTranslations("properties.form");
   const tEnums = useTranslations("enums");
   const tLookups = useTranslations("lookups");
@@ -212,10 +214,10 @@ export function PropertyForm({ mode, propertyId, defaults = EMPTY_PROPERTY_VALUE
         </Field>
       </Card>
 
-      <Section title={t("sections.assignment")}>
+      {canAssign ? <Section title={t("sections.assignment")}>
         {select("responsibleAgentId", t("fields.responsible"), "responsibleAgentId", agents.map((a) => ({ value: a.id, label: a.name })))}
         {select("visibility", t("fields.recordVisibility"), "visibility", (["office", "private"] as const).map((v) => ({ value: v, label: t(`options.recordVisibility.${v}`) })), false)}
-      </Section>
+      </Section> : null}
 
       {state.error ? (
         <p role="alert" className="text-14 font-semibold text-danger-text">

@@ -77,3 +77,29 @@ test("ingatlanlista: szűrők az URL-ben, táblázatos nézet", async ({ page },
   await page.getByRole("button", { name: "Szűrők törlése" }).click();
   await expect(page).not.toHaveURL(/ugylet=/);
 });
+
+test("térkép nézet: jelölők jelennek meg, a rajzolt terület szűri a listát", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Térkép-ellenőrzés desktopon");
+  await demoLogin(page);
+  await page.goto("/ingatlanok?nezet=terkep");
+
+  await expect(page.locator(".maplibregl-marker").first()).toBeVisible({ timeout: 20_000 });
+  const total = await page.locator(".maplibregl-marker").count();
+  expect(total).toBeGreaterThan(20);
+
+  const count = async () => Number((await page.getByText(/ingatlan a térkép területén/).first().textContent())!.match(/\d+/)![0]);
+  const before = await count();
+
+  await page.getByRole("button", { name: "Terület rajzolása" }).click();
+  const box = (await page.getByRole("region", { name: "Ingatlanok térképen" }).boundingBox())!;
+  for (const [x, y] of [[0.05, 0.05], [0.4, 0.05], [0.4, 0.4], [0.05, 0.4]]) {
+    await page.mouse.click(box.x + box.width * x, box.y + box.height * y);
+  }
+  await page.getByRole("button", { name: "Kész" }).click();
+  await expect(page.getByRole("button", { name: "Terület törlése" })).toBeVisible();
+  await expect.poll(count).toBeLessThan(before);
+
+  await page.getByRole("button", { name: "Terület törlése" }).click();
+  await expect(page.getByRole("button", { name: "Terület rajzolása" })).toBeVisible();
+  await expect.poll(count).toBe(before);
+});

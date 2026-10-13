@@ -623,6 +623,28 @@
         "saveFailed": "A módosítás nem sikerült. Próbáld újra.",
         "needsSave": "A fotók feltöltéséhez előbb mentsd az ingatlant."
       }
+    },
+    "map": {
+      "label": "Ingatlanok térképen",
+      "countInArea": "<strong>{count} ingatlan</strong> a térkép területén",
+      "sortedBy": "Rendezés: {sort}",
+      "draw": "Terület rajzolása",
+      "drawHint": "Kattints a pontok felvételéhez, majd nyomd meg a Kész gombot.",
+      "finish": "Kész",
+      "cancel": "Mégse",
+      "clearArea": "Terület törlése",
+      "avgPerSqm": "Átlag m²-ár a nézetben",
+      "drawnArea": "Rajzolt terület",
+      "propertiesCount": "{count} ingatlan",
+      "noCoords": "{count} ingatlan nem látszik a térképen, mert nincs megadva a pontos helye.",
+      "empty": "Nincs ingatlan ebben a térképrészletben.",
+      "markerLabel": "{price} – {address}",
+      "zoomIn": "Nagyítás",
+      "zoomOut": "Kicsinyítés",
+      "badges": {
+        "new": "Új · {days}"
+      },
+      "listLabel": "Térképen látható ingatlanok"
     }
   },
   "placeholder": {

@@ -54,3 +54,6 @@ next-env.d.ts
 /scripts/seed/photos/**/*.jpg
 /scripts/seed/photos/**/*.jpeg
 /scripts/seed/photos/**/*.webp
+
+# MapLibre worker másolat (scripts/dev/copy-maplibre-worker.mjs)
+/public/maplibre/

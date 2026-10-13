@@ -8,6 +8,9 @@ export const publicEnv = {
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   googleAuthEnabled: process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true",
+  /** Térképcsempék (raszter). Az alapértelmezett OSM-szerver csak fejlesztéshez és kis forgalomhoz való (D-021). */
+  mapTileUrl: process.env.NEXT_PUBLIC_MAP_TILE_URL ?? "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  mapAttribution: process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ?? "© OpenStreetMap-közreműködők",
 };
 
 /** Csak szerveren olvasható értékek. */

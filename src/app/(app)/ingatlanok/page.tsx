@@ -11,17 +11,21 @@ import { PropertiesToolbar } from "@/features/properties/components/properties-t
 import { PropertyGrid } from "@/features/properties/components/property-grid";
 import { PropertyTable } from "@/features/properties/components/property-table";
 import { PropertiesPagination } from "@/features/properties/components/properties-pagination";
+import { MapView } from "@/features/properties/components/map-view";
+
+/** A térképnézet lapozás nélkül, egy nagyobb kötegben kéri az ingatlanokat. */
+const MAP_LIMIT = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("nav");
   return { title: t("properties") };
 }
 
-/** Ingatlanok: rács- és listanézet URL-ben tárolt szűrőkkel (a térkép nézet a következő lépésben jön). */
+/** Ingatlanok: rács- és listanézet URL-ben tárolt szűrőkkel és térkép. */
 export default async function PropertiesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const ctx = await requireAppContext();
   const filters = parsePropertyFilters(await searchParams);
-  const { items, total, pageSize } = await getProperties(ctx, filters);
+  const { items, total, pageSize } = await getProperties(ctx, filters, new Date(), filters.view === "terkep" ? { limit: MAP_LIMIT } : {});
   const t = await getTranslations("properties");
   const filtered = activeFilterCount(filters) > 0;
 
@@ -42,6 +46,8 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
           }
           className="py-16"
         />
+      ) : filters.view === "terkep" ? (
+        <MapView items={items} sort={filters.sort} />
       ) : filters.view === "lista" ? (
         <PropertyTable items={items} />
       ) : (

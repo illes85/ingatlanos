@@ -4,7 +4,7 @@
  * belépünk a nyilvános (anon) kulccsal — pontosan úgy, ahogy a böngésző is.
  */
 import { config } from "dotenv";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { DEMO_ACCOUNTS } from "@/config/demo";
@@ -132,5 +132,121 @@ describe("szerepkörök az irodán belül", () => {
       .from("memberships")
       .insert({ organization_id: kapuOrgId, user_id: agent.userId, role: "owner" });
     expect(memberError).not.toBeNull();
+  });
+});
+
+/** 1x1 pixeles PNG: a storage-tesztek apró, valódi képfájlt töltenek fel. */
+const PIXEL_PNG = Uint8Array.from(
+  atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="),
+  (c) => c.charCodeAt(0),
+);
+
+describe("ingatlan-média, storage és jutalékfeltétel jogosultságok (biztonsági átnézés, D-022)", () => {
+  let ownerProperty: { id: string };
+  let agentProperty: { id: string };
+  const tempPaths: string[] = [];
+
+  beforeAll(async () => {
+    const { data: o } = await owner.client.from("properties").select("id").eq("responsible_agent_id", owner.userId).eq("visibility", "office").limit(1).single();
+    ownerProperty = o!;
+    const { data: a } = await agent.client.from("properties").select("id").eq("responsible_agent_id", agent.userId).limit(1).single();
+    agentProperty = a!;
+  });
+
+  async function uploadAs(who: typeof owner, propertyId: string, upsert = false, name = `${crypto.randomUUID()}.png`) {
+    const path = `${kapuOrgId}/${propertyId}/${name}`;
+    const result = await who.client.storage.from("property-media").upload(path, PIXEL_PNG, { contentType: "image/png", upsert });
+    if (!result.error) tempPaths.push(path);
+    return { path, ...result };
+  }
+
+  afterAll(async () => {
+    if (tempPaths.length > 0) await owner.client.storage.from("property-media").remove(tempPaths);
+  });
+
+  it("az ügynök nem tölthet fel fotót más ügynök ingatlanához, a felelős igen", async () => {
+    const foreign = await uploadAs(agent, ownerProperty.id);
+    expect(foreign.error).not.toBeNull();
+    const own = await uploadAs(agent, agentProperty.id);
+    expect(own.error).toBeNull();
+  });
+
+  it("az ügynök nem írhatja felül és nem törölheti más fotóját", async () => {
+    const photo = await uploadAs(owner, ownerProperty.id);
+    expect(photo.error).toBeNull();
+
+    const overwrite = await agent.client.storage.from("property-media").upload(photo.path, PIXEL_PNG, { contentType: "image/png", upsert: true });
+    expect(overwrite.error).not.toBeNull();
+
+    const removed = await agent.client.storage.from("property-media").remove([photo.path]);
+    expect(removed.data ?? []).toHaveLength(0);
+    const still = await owner.client.storage.from("property-media").createSignedUrl(photo.path, 60);
+    expect(still.error).toBeNull();
+  });
+
+  it("a másik szervezet felhasználója nem tölthet fel, és nem kérhet aláírt URL-t a Kapu fájljaira", async () => {
+    const attempt = await uploadAs(solo, ownerProperty.id);
+    expect(attempt.error).not.toBeNull();
+    const photo = await uploadAs(owner, ownerProperty.id);
+    const signed = await solo.client.storage.from("property-media").createSignedUrl(photo.path, 60);
+    expect(signed.error).not.toBeNull();
+  });
+
+  it("az ügynök nem vehet fel, nem módosíthat és nem törölhet médiasort más ügynök ingatlanán", async () => {
+    const photo = await uploadAs(owner, ownerProperty.id);
+    const { data: row } = await owner.client
+      .from("property_media")
+      .insert({ organization_id: kapuOrgId, property_id: ownerProperty.id, storage_path: photo.path, kind: "photo", sort_order: 999 })
+      .select("id")
+      .single();
+    expect(row).not.toBeNull();
+
+    const insert = await agent.client
+      .from("property_media")
+      .insert({ organization_id: kapuOrgId, property_id: ownerProperty.id, storage_path: photo.path, kind: "photo", sort_order: 1000 });
+    expect(insert.error).not.toBeNull();
+
+    const update = await agent.client.from("property_media").update({ is_public: false }).eq("id", row!.id).select("id");
+    expect(update.data ?? []).toHaveLength(0);
+    const del = await agent.client.from("property_media").delete().eq("id", row!.id).select("id");
+    expect(del.data ?? []).toHaveLength(0);
+
+    const cleanup = await owner.client.from("property_media").delete().eq("id", row!.id).select("id");
+    expect(cleanup.data).toHaveLength(1);
+  });
+
+  it("médiasor útvonala csak a saját szervezet mappájára mutathat", async () => {
+    const { error } = await owner.client
+      .from("property_media")
+      .insert({ organization_id: kapuOrgId, property_id: ownerProperty.id, storage_path: "00000000-0000-0000-0000-000000000000/x/y.png", kind: "photo" });
+    expect(error).not.toBeNull();
+  });
+
+  it("jutalékfeltételt az ügynök csak a saját ingatlanára hozhat létre, a másik szervezet sehova", async () => {
+    const foreign = await agent.client.from("property_commission_terms").insert({ property_id: ownerProperty.id, organization_id: kapuOrgId, commission_pct: 1 });
+    expect(foreign.error).not.toBeNull();
+    const cross = await solo.client.from("property_commission_terms").insert({ property_id: ownerProperty.id, organization_id: kapuOrgId, commission_pct: 1 });
+    expect(cross.error).not.toBeNull();
+    const assistantWrite = await assistant.client.from("property_commission_terms").insert({ property_id: ownerProperty.id, organization_id: kapuOrgId, commission_pct: 1 });
+    expect(assistantWrite.error).not.toBeNull();
+  });
+
+  it("a felelőst csak szervezeti ügynökre lehet váltani, és a váltás az owner vagy a felelős joga", async () => {
+    const outsider = await owner.client.from("properties").update({ responsible_agent_id: solo.userId }).eq("id", ownerProperty.id).select("id");
+    expect(outsider.error).not.toBeNull();
+
+    const hijack = await assistant.client.from("properties").update({ responsible_agent_id: assistant.userId }).eq("id", ownerProperty.id).select("id");
+    expect(hijack.error !== null || (hijack.data ?? []).length === 0).toBe(true);
+    const { data: after } = await owner.client.from("properties").select("responsible_agent_id").eq("id", ownerProperty.id).single();
+    expect(after!.responsible_agent_id).toBe(owner.userId);
+  });
+
+  it("a dokumentumok fájljai csak a documents sor láthatósága szerint listázhatók", async () => {
+    const { data: files } = await agent.client.storage.from("documents").list(kapuOrgId);
+    const { data: visibleDocs } = await agent.client.from("documents").select("storage_path").not("storage_path", "is", null);
+    const visible = new Set((visibleDocs ?? []).map((d) => d.storage_path));
+    for (const file of files ?? []) {
+      if (file.id) expect(visible.has(`${kapuOrgId}/${file.name}`)).toBe(true);
+    }
   });
 });
