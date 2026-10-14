@@ -54,8 +54,8 @@ export async function ShowingsCard({ showings, now }: { showings: ShowingItem[];
           })}
         </ol>
       )}
-      <Button variant="dashed" shape="soft" className="mt-auto w-full">
-        {t("add")}
+      <Button variant="dashed" shape="soft" className="mt-auto w-full" asChild>
+        <Link href="/naptar/uj">{t("add")}</Link>
       </Button>
     </Card>
   );
@@ -92,8 +92,8 @@ export async function NextShowingCard({ showing, now }: { showing: ShowingItem |
             {t("dashboard.showings.navigate")}
           </a>
         </Button>
-        <Button variant="secondary" shape="soft" className="flex-1">
-          {t("dashboard.showings.sheet")}
+        <Button variant="secondary" shape="soft" className="flex-1" asChild>
+          <Link href={`/naptar/${showing.id}/lap`}>{t("dashboard.showings.sheet")}</Link>
         </Button>
       </div>
     </Card>

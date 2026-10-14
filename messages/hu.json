@@ -1205,5 +1205,168 @@
       "moved": "{from} → {to}",
       "created": "Felvéve: {to}"
     }
+  },
+  "tasks": {
+    "title": "Feladatok",
+    "newTask": "Új feladat",
+    "tabsLabel": "Feladatok szűrése",
+    "tabs": {
+      "nyitott": "Nyitott",
+      "ma": "Mára és késő",
+      "kesz": "Kész"
+    },
+    "empty": {
+      "nyitott": {
+        "title": "Nincs nyitott feladat",
+        "body": "Vegyél fel egy teendőt, és itt követheted a határidejét."
+      },
+      "ma": {
+        "title": "Mára nincs teendő",
+        "body": "Nincs mai vagy lejárt határidejű feladatod."
+      },
+      "kesz": {
+        "title": "Még nincs elvégzett feladat",
+        "body": "Az elvégzett feladatok itt jelennek meg."
+      }
+    },
+    "complete": "Elvégzettnek jelölés",
+    "reopen": "Visszanyitás",
+    "delete": "Feladat törlése",
+    "confirmDelete": "Biztosan törlöd ezt a feladatot?",
+    "overdue": "Késik",
+    "noDue": "Nincs határidő",
+    "priority": {
+      "low": "Alacsony",
+      "normal": "Normál",
+      "high": "Sürgős"
+    },
+    "repeat": {
+      "none": "Nem ismétlődik",
+      "daily": "Naponta",
+      "weekly": "Hetente",
+      "monthly": "Havonta"
+    },
+    "toast": {
+      "done": "Feladat elvégezve.",
+      "reopened": "Feladat visszanyitva.",
+      "deleted": "Feladat törölve.",
+      "failed": "A művelet nem sikerült."
+    },
+    "form": {
+      "titleNew": "Új feladat",
+      "subtitle": "Határidővel, ügyfélhez vagy ingatlanhoz kötve; igény szerint ismétlődik.",
+      "title": "Mi a teendő?",
+      "dueDate": "Határidő (nap)",
+      "dueTime": "Időpont",
+      "dueTimeHint": "Üresen hagyva aznap éjfélig esedékes.",
+      "priority": "Fontosság",
+      "repeat": "Ismétlődés",
+      "property": "Ingatlan",
+      "contact": "Ügyfél",
+      "assignee": "Felelős",
+      "description": "Megjegyzés",
+      "submit": "Feladat felvétele",
+      "errors": {
+        "required": "Ez a mező kötelező",
+        "choice": "Válassz a listából",
+        "date": "Adj meg érvényes dátumot",
+        "time": "Adj meg érvényes időpontot",
+        "tooLong": "Túl hosszú szöveg",
+        "generic": "A mentés nem sikerült, próbáld újra.",
+        "forbidden": "Ehhez nincs jogosultságod."
+      }
+    }
+  },
+  "calendar": {
+    "title": "Naptár",
+    "newShowing": "Bemutató rögzítése",
+    "navLabel": "Időszak váltása",
+    "viewLabel": "Nézet",
+    "prev": "Előző időszak",
+    "next": "Következő időszak",
+    "today": "Ma",
+    "views": {
+      "het": "Hét",
+      "nap": "Nap"
+    },
+    "emptyDay": "Nincs program ezen a napon."
+  },
+  "showings": {
+    "activity": {
+      "scheduled": "Bemutató ütemezve",
+      "completed": "Bemutató lezajlott",
+      "cancelled": "Bemutató lemondva",
+      "no_show": "A vevő nem jelent meg a bemutatón",
+      "feedbackRequested": "Visszajelzés kérve a bemutató után"
+    },
+    "form": {
+      "titleNew": "Bemutató rögzítése",
+      "subtitle": "Időpont, ingatlan és vevő – másfél perc alatt.",
+      "property": "Ingatlan",
+      "choose": "Válassz ingatlant…",
+      "date": "Nap",
+      "time": "Időpont",
+      "duration": "Időtartam",
+      "minutes": "{count} perc",
+      "buyer": "Vevő",
+      "agent": "Bemutatja",
+      "notes": "Megjegyzés",
+      "submit": "Bemutató rögzítése",
+      "errors": {
+        "required": "Ez a mező kötelező",
+        "choice": "Válassz a listából",
+        "date": "Adj meg érvényes dátumot",
+        "time": "Adj meg érvényes időpontot",
+        "tooLong": "Túl hosszú szöveg",
+        "rating": "Az értékelés 1 és 5 között lehet",
+        "generic": "A mentés nem sikerült, próbáld újra.",
+        "forbidden": "Ehhez nincs jogosultságod."
+      }
+    },
+    "detail": {
+      "title": "Bemutató",
+      "back": "Naptár",
+      "property": "Ingatlan",
+      "buyer": "Vevő",
+      "feedbackRequested": "A visszajelzést már kérted a vevőtől.",
+      "sheet": "Bemutatási lap",
+      "confirmCancel": "Biztosan lemondod a bemutatót?",
+      "actions": {
+        "completed": "Lezajlott",
+        "no_show": "Nem jelent meg",
+        "cancelled": "Lemondás",
+        "scheduled": "Vissza ütemezettre",
+        "requestFeedback": "Visszajelzés kérése"
+      },
+      "toast": {
+        "completed": "Bemutató lezajlottként rögzítve.",
+        "no_show": "Rögzítve: a vevő nem jelent meg.",
+        "cancelled": "Bemutató lemondva.",
+        "scheduled": "Bemutató újra ütemezve.",
+        "feedbackRequested": "Visszajelzés-kérés rögzítve.",
+        "feedbackSaved": "Visszajelzés mentve.",
+        "failed": "A művelet nem sikerült."
+      },
+      "feedback": {
+        "title": "Vevői visszajelzés",
+        "rating": "Értékelés",
+        "stars": "{count, plural, one {# csillag} other {# csillag}}",
+        "text": "Visszajelzés szövege",
+        "placeholder": "Mit mondott a vevő az ingatlanról?",
+        "save": "Visszajelzés mentése"
+      }
+    },
+    "sheet": {
+      "title": "Bemutatási lap",
+      "back": "Vissza a bemutatóhoz",
+      "print": "Nyomtatás",
+      "property": "Ingatlan",
+      "when": "Időpont",
+      "agent": "Bemutatja",
+      "buyer": "Érdeklődő",
+      "declaration": "Alulírott érdeklődő igazolom, hogy a fenti ingatlant a megjelölt időpontban megtekintettem, és tudomásul veszem, hogy az ingatlan megismerését a közvetítő biztosította számára.",
+      "signBuyer": "Érdeklődő aláírása",
+      "signAgent": "Ügynök aláírása"
+    }
   }
 }

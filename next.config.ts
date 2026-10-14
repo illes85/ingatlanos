@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
       "next-intl/config": "./src/i18n/request.ts",
     },
   },
+  // Fejlesztés közben a telefonról (azonos Wi-Fi) is megnyitható az oldal erről a címről.
+  allowedDevOrigins: ["10.204.68.11"],
   images: {
     remotePatterns: [
       {

@@ -479,3 +479,120 @@ describe("ügyletek védelme (D-030)", () => {
     expect(showing.error).not.toBeNull();
   });
 });
+
+describe("feladatok védelme (D-031)", () => {
+  const created: string[] = [];
+  afterAll(async () => {
+    if (created.length > 0) await owner.client.from("tasks").delete().in("id", created);
+  });
+  const base = () => ({ organization_id: kapuOrgId, title: "RLS feladat" });
+
+  it("az ügynök csak magának vehet fel feladatot, az irodavezető bárkinek", async () => {
+    const own = await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId }).select("id").single();
+    expect(own.error).toBeNull();
+    created.push(own.data!.id);
+    const other = await agent.client.from("tasks").insert({ ...base(), assignee_id: owner.userId });
+    expect(other.error).not.toBeNull();
+    const byOwner = await owner.client.from("tasks").insert({ ...base(), assignee_id: agent.userId }).select("id").single();
+    expect(byOwner.error).toBeNull();
+    created.push(byOwner.data!.id);
+  });
+
+  it("idegen szervezet tagja nem lehet felelős, és idegen ügyfélre/ingatlanra sem hivatkozhat feladat", async () => {
+    const { data: soloProperty } = await solo.client.from("properties").select("id").limit(1).single();
+    const { data: soloContact } = await solo.client.from("contacts").select("id").limit(1).single();
+    expect((await owner.client.from("tasks").insert({ ...base(), assignee_id: solo.userId })).error).not.toBeNull();
+    expect((await owner.client.from("tasks").insert({ ...base(), property_id: soloProperty!.id })).error).not.toBeNull();
+    expect((await owner.client.from("tasks").insert({ ...base(), contact_id: soloContact!.id })).error).not.toBeNull();
+  });
+
+  it("az ügynök nem köthet feladatot más ügynök ügyfeléhez, és a szervezet/létrehozó nem hamisítható", async () => {
+    const { data: foreign } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    expect((await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId, contact_id: foreign!.id })).error).not.toBeNull();
+
+    const forged = await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId, created_by: owner.userId }).select("id, created_by").single();
+    expect(forged.error).toBeNull();
+    created.push(forged.data!.id);
+    expect(forged.data!.created_by).toBe(agent.userId);
+
+    const { data: soloOrg } = await solo.client.from("organizations").select("id").single();
+    const move = await agent.client.from("tasks").update({ organization_id: soloOrg!.id }).eq("id", forged.data!.id).select("id");
+    expect(move.error).not.toBeNull();
+  });
+
+  it("az elvégzés időpontja a státuszból következik", async () => {
+    const task = await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId }).select("id").single();
+    created.push(task.data!.id);
+    const done = await agent.client.from("tasks").update({ status: "done" }).eq("id", task.data!.id).select("completed_at").single();
+    expect(done.data!.completed_at).not.toBeNull();
+    const reopened = await agent.client.from("tasks").update({ status: "open" }).eq("id", task.data!.id).select("completed_at").single();
+    expect(reopened.data!.completed_at).toBeNull();
+  });
+
+  it("az ügynök nem látja más feladatát, az irodavezető igen", async () => {
+    const mine = await owner.client.from("tasks").insert({ ...base(), assignee_id: owner.userId }).select("id").single();
+    created.push(mine.data!.id);
+    const seen = await agent.client.from("tasks").select("id").eq("id", mine.data!.id);
+    expect(seen.data).toHaveLength(0);
+  });
+
+  it("az ügynök nem köthet feladatot vagy bemutatót más ügynök magán-ingatlanához", async () => {
+    const { data: priv } = await owner.client.from("properties").select("id").eq("visibility", "private").neq("responsible_agent_id", agent.userId).limit(1).maybeSingle();
+    if (!priv) return; // a demóadatban nincs magán-ingatlan: nincs mit ellenőrizni
+    expect((await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId, property_id: priv.id })).error).not.toBeNull();
+    expect((await agent.client.from("showings").insert({ organization_id: kapuOrgId, property_id: priv.id, agent_id: agent.userId, starts_at: new Date().toISOString() })).error).not.toBeNull();
+  });
+
+  it("bemutatóhoz az ügynök csak a saját ügyfelét köthet, a létrehozó nem hamisítható", async () => {
+    const { data: office } = await owner.client.from("properties").select("id").eq("visibility", "office").limit(1).single();
+    const { data: foreign } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    const bad = await agent.client.from("showings").insert({ organization_id: kapuOrgId, property_id: office!.id, agent_id: agent.userId, buyer_contact_id: foreign!.id, starts_at: new Date().toISOString() });
+    expect(bad.error).not.toBeNull();
+    const ok = await agent.client
+      .from("showings")
+      .insert({ organization_id: kapuOrgId, property_id: office!.id, agent_id: agent.userId, starts_at: new Date().toISOString(), created_by: owner.userId })
+      .select("id, created_by")
+      .single();
+    expect(ok.error).toBeNull();
+    expect(ok.data!.created_by).toBe(agent.userId);
+    await owner.client.from("showings").delete().eq("id", ok.data!.id);
+  });
+
+  it("a más ügynök bemutatóját az ügynök nem veheti át", async () => {
+    const { data: office } = await owner.client.from("properties").select("id").eq("visibility", "office").eq("responsible_agent_id", agent.userId).limit(1).maybeSingle();
+    if (!office) return;
+    const theirs = await owner.client.from("showings").insert({ organization_id: kapuOrgId, property_id: office.id, agent_id: owner.userId, starts_at: new Date().toISOString() }).select("id").single();
+    expect(theirs.error).toBeNull();
+    const steal = await agent.client.from("showings").update({ agent_id: agent.userId }).eq("id", theirs.data!.id).select("id");
+    expect(steal.error).not.toBeNull();
+    await owner.client.from("showings").delete().eq("id", theirs.data!.id);
+  });
+
+  it("az elvégzett feladat időpontja nem írható vissza", async () => {
+    const task = await agent.client.from("tasks").insert({ ...base(), assignee_id: agent.userId }).select("id").single();
+    created.push(task.data!.id);
+    const done = await agent.client.from("tasks").update({ status: "done" }).eq("id", task.data!.id).select("completed_at").single();
+    const forged = await agent.client.from("tasks").update({ completed_at: "2020-01-01T00:00:00Z" }).eq("id", task.data!.id).select("completed_at").single();
+    expect(forged.data!.completed_at).toBe(done.data!.completed_at);
+  });
+
+  it("az ismétlődő feladat elvégzésekor az eredeti létrehozóval jön a következő példány, akkor is, ha az ügynök zárja le", async () => {
+    const { data: contact } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    const title = `RLS ismétlődő ${Date.now()}`;
+    const first = await owner.client
+      .from("tasks")
+      .insert({ ...base(), title, assignee_id: agent.userId, contact_id: contact!.id, due_at: new Date(Date.now() - 86_400_000).toISOString(), recurrence_rule: "FREQ=DAILY" })
+      .select("id")
+      .single();
+    expect(first.error).toBeNull();
+    const done = await agent.client.from("tasks").update({ status: "done" }).eq("id", first.data!.id).select("id");
+    expect(done.error).toBeNull();
+    const { data: rows } = await owner.client.from("tasks").select("id, status, created_by, contact_id, due_at").eq("title", title);
+    created.push(...(rows ?? []).map((r) => r.id));
+    expect(rows).toHaveLength(2);
+    const next = rows!.find((r) => r.status === "open")!;
+    expect(next.created_by).toBe(owner.userId);
+    expect(next.contact_id).toBe(contact!.id);
+    expect(new Date(next.due_at!).getTime()).toBeGreaterThan(Date.now());
+  });
+});
