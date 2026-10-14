@@ -725,3 +725,132 @@ describe("nyilvános ingatlan-oldal (D-032)", () => {
     expect(lead!.consent_at).not.toBeNull();
   });
 });
+
+describe("értesítések (D-033)", () => {
+  const createdTasks: string[] = [];
+  const admin = () => createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+
+  afterAll(async () => {
+    if (createdTasks.length > 0) await admin().from("tasks").delete().in("id", createdTasks);
+  });
+
+  const seedNote = async (title: string, link: string | null = "/feladatok") => {
+    const { data, error } = await admin()
+      .from("notifications")
+      .insert({ organization_id: kapuOrgId, user_id: agent.userId, type: "lead", title, link })
+      .select("id")
+      .single();
+    return { id: data?.id, error };
+  };
+
+  it("értesítést kliens nem hozhat létre, és a tartalmát sem írhatja át, csak az olvasottságot", async () => {
+    const forged = await agent.client
+      .from("notifications")
+      .insert({ organization_id: kapuOrgId, user_id: agent.userId, type: "lead", title: "Hamis" });
+    expect(forged.error).not.toBeNull();
+
+    const note = await seedNote("Védelmi teszt");
+    try {
+      const edit = await agent.client.from("notifications").update({ title: "Átírt" }).eq("id", note.id!);
+      expect(edit.error).not.toBeNull();
+      const del = await agent.client.from("notifications").delete().eq("id", note.id!).select();
+      expect(del.data ?? []).toHaveLength(0);
+      const stillThere = await admin().from("notifications").select("title").eq("id", note.id!).single();
+      expect(stillThere.data?.title).toBe("Védelmi teszt");
+    } finally {
+      await admin().from("notifications").delete().eq("id", note.id!);
+    }
+  });
+
+  it("más értesítését senki nem látja és nem módosítja", async () => {
+    const note = await seedNote("Titkos értesítés");
+    try {
+      for (const other of [owner, assistant, solo]) {
+        const seen = await other.client.from("notifications").select("id").eq("id", note.id!);
+        expect(seen.data ?? []).toHaveLength(0);
+        const upd = await other.client.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", note.id!).select();
+        expect(upd.data ?? []).toHaveLength(0);
+      }
+    } finally {
+      await admin().from("notifications").delete().eq("id", note.id!);
+    }
+  });
+
+  it("a link csak biztonságos belső útvonal lehet, a belső függvény kliensről nem hívható", async () => {
+    for (const bad of ["//evil.com", "/" + String.fromCharCode(92) + "evil.com", "/" + String.fromCharCode(9) + "/evil.com", "https://evil.com", "javascript:alert(1)"]) {
+      const res = await seedNote("Rossz link", bad);
+      if (res.id) await admin().from("notifications").delete().eq("id", res.id);
+      expect(res.error, bad).not.toBeNull();
+    }
+    const good = await seedNote("Jó link", `/naptar/${crypto.randomUUID()}`);
+    expect(good.error).toBeNull();
+    await admin().from("notifications").delete().eq("id", good.id!);
+
+    const direct = await agent.client.rpc("notify" as never, {} as never);
+    expect(direct.error).not.toBeNull();
+  });
+
+  it("a másnak kiosztott feladat értesítést hoz létre a címzettnek, a magadnak kiosztott nem", async () => {
+    const title = `Értesítés teszt ${Date.now()}`;
+    const mineTask = await owner.client
+      .from("tasks")
+      .insert({ organization_id: kapuOrgId, title: `${title} saját`, assignee_id: owner.userId })
+      .select("id")
+      .single();
+    const forAgent = await owner.client
+      .from("tasks")
+      .insert({ organization_id: kapuOrgId, title, assignee_id: agent.userId })
+      .select("id")
+      .single();
+    expect(forAgent.error).toBeNull();
+    createdTasks.push(mineTask.data!.id, forAgent.data!.id);
+
+    const { data: got } = await agent.client.from("notifications").select("type, title, body, link").eq("body", title);
+    expect(got).toHaveLength(1);
+    expect(got![0]).toMatchObject({ type: "task_assigned", link: "/feladatok" });
+
+    const { data: self } = await owner.client.from("notifications").select("id").eq("body", `${title} saját`);
+    expect(self ?? []).toHaveLength(0);
+
+    // olvasottra állítás: a saját során működik
+    const { data: row } = await agent.client.from("notifications").select("id").eq("body", title).single();
+    const read = await agent.client.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", row!.id).select("read_at");
+    expect(read.data?.[0]?.read_at).not.toBeNull();
+    await admin().from("notifications").delete().eq("id", row!.id);
+  });
+
+  it("a nyilvános oldalról érkezett érdeklődés értesíti az ingatlan felelősét", async () => {
+    const svc = admin();
+    const { data: property } = await svc
+      .from("properties")
+      .select("id, public_enabled, public_slug, responsible_agent_id")
+      .eq("status", "active")
+      .not("responsible_agent_id", "is", null)
+      .limit(1)
+      .single();
+    const original = { public_enabled: property!.public_enabled, public_slug: property!.public_slug };
+    const slug = `ertesites-teszt-${Date.now()}`;
+    const name = `Értesítős Teszt ${Date.now()}`;
+    await svc.from("properties").update({ public_enabled: true, public_slug: slug }).eq("id", property!.id);
+    try {
+      const res = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: name, p_phone: "", p_email: "ertesites@example.com", p_message: "", p_consent: true });
+      expect(res.data).toBe("ok");
+      const { data: notes } = await svc
+        .from("notifications")
+        .select("id, type, user_id")
+        .eq("body", name);
+      expect(notes).toHaveLength(1);
+      expect(notes![0]).toMatchObject({ type: "public_inquiry", user_id: property!.responsible_agent_id });
+      await svc.from("notifications").delete().eq("body", name);
+    } finally {
+      await svc.from("leads").delete().eq("full_name", name);
+      await svc.from("properties").update(original).eq("id", property!.id);
+    }
+  });
+});
+
+// A tesztek által (kiváltókon át) létrejött értesítések takarítása, hogy a demó fiókok csengője tiszta maradjon.
+afterAll(async () => {
+  const svc = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+  await svc.from("notifications").delete().or("body.like.RLS %,body.like.Értesítés teszt%,body.like.E2E%,title.like.RLS %,body.eq.Teszt Látogató,body.eq.Telefonos Teszt,body.like.Értesítős Teszt%");
+});

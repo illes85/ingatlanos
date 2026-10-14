@@ -1444,5 +1444,10 @@
       "title": "Ez az oldal már nem érhető el",
       "body": "Lehet, hogy az ingatlan időközben elkelt, vagy a megosztást kikapcsolták. Kérdezd a linket küldő ügynököt."
     }
+  },
+  "notifications": {
+    "markAll": "Mind olvasott",
+    "empty": "Nincs új értesítésed.",
+    "labelUnread": "Értesítések, {count} olvasatlan"
   }
 }

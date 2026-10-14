@@ -1,17 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Bell, Building2, CalendarPlus, Inbox, KanbanSquare, ListTodo, Plus, Search, UserPlus } from "lucide-react";
+import { Building2, CalendarPlus, Inbox, KanbanSquare, ListTodo, Plus, Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/feedback";
 import { AiSpark } from "@/components/ai/ai";
+import { NotificationsMenu } from "@/features/notifications/components/notifications-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  Tooltip,
 } from "@/components/ui/overlay";
 import { cn } from "@/lib/utils";
 import { useShell, useShortcutLabel } from "./shell-context";
@@ -59,37 +60,21 @@ export function AssistantButton({ className }: { className?: string }) {
 }
 
 export function NotificationsButton() {
-  const t = useTranslations();
-  const { counts } = useShell().data;
-  return (
-    <Tooltip content={t("shell.notifications")} side="bottom">
-      <Button
-        variant="secondary"
-        size="icon"
-        aria-label={t("shell.notifications")}
-        className="relative text-ink-2"
-        onClick={() => toast(t("shell.notifications"), { description: t("common.featureSoon") })}
-      >
-        <Bell size={18} strokeWidth={1.8} />
-        {counts.unreadNotifications > 0 ? (
-          <span className="absolute top-2.5 right-[11px] size-2 rounded-full border-2 border-surface bg-danger box-content" />
-        ) : null}
-      </Button>
-    </Tooltip>
-  );
+  return <NotificationsMenu />;
 }
 
 const NEW_ACTIONS = [
-  { key: "newProperty", icon: Building2 },
-  { key: "newContact", icon: UserPlus },
-  { key: "newLead", icon: Inbox },
-  { key: "newShowing", icon: CalendarPlus },
-  { key: "newDeal", icon: KanbanSquare },
-  { key: "newTask", icon: ListTodo },
+  { key: "newProperty", icon: Building2, href: "/ingatlanok/uj" },
+  { key: "newContact", icon: UserPlus, href: "/ugyfelek/uj" },
+  { key: "newLead", icon: Inbox, href: "/leadek/uj" },
+  { key: "newShowing", icon: CalendarPlus, href: "/naptar/uj" },
+  { key: "newDeal", icon: KanbanSquare, href: "/ugyletek/uj" },
+  { key: "newTask", icon: ListTodo, href: "/feladatok/uj" },
 ] as const;
 
 export function NewMenu({ iconOnly = false }: { iconOnly?: boolean }) {
   const t = useTranslations();
+  const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -99,8 +84,8 @@ export function NewMenu({ iconOnly = false }: { iconOnly?: boolean }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side={iconOnly ? "right" : "bottom"}>
-        {NEW_ACTIONS.map(({ key, icon: Icon }) => (
-          <DropdownMenuItem key={key} onSelect={() => toast(t(`shell.${key}`), { description: t("common.featureSoon") })}>
+        {NEW_ACTIONS.map(({ key, icon: Icon, href }) => (
+          <DropdownMenuItem key={key} onSelect={() => router.push(href)}>
             <Icon />
             {t(`shell.${key}`)}
           </DropdownMenuItem>

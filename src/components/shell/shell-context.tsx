@@ -4,7 +4,7 @@ import * as React from "react";
 import type { MemberRole, PlanTier } from "@/lib/auth/session";
 
 export interface ShellData {
-  user: { name: string; email: string | null; role: MemberRole };
+  user: { id: string; name: string; email: string | null; role: MemberRole };
   organization: { name: string; type: "individual" | "office"; isDemo: boolean };
   plan: {
     tier: PlanTier;

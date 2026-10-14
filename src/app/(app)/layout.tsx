@@ -27,7 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     : 0;
 
   const data: ShellData = {
-    user: { name: ctx.fullName, email: ctx.email, role: ctx.role },
+    user: { id: ctx.userId, name: ctx.fullName, email: ctx.email, role: ctx.role },
     organization: { name: ctx.organization.name, type: ctx.organization.type, isDemo: ctx.organization.isDemo },
     plan: {
       tier: ctx.effectivePlan,
