@@ -891,6 +891,7 @@ export type Database = {
           ai_score: number | null
           ai_score_reason: string | null
           assigned_to: string | null
+          consent_at: string | null
           contact_id: string | null
           converted_at: string | null
           created_at: string
@@ -914,6 +915,7 @@ export type Database = {
           ai_score?: number | null
           ai_score_reason?: string | null
           assigned_to?: string | null
+          consent_at?: string | null
           contact_id?: string | null
           converted_at?: string | null
           created_at?: string
@@ -937,6 +939,7 @@ export type Database = {
           ai_score?: number | null
           ai_score_reason?: string | null
           assigned_to?: string | null
+          consent_at?: string | null
           contact_id?: string | null
           converted_at?: string | null
           created_at?: string
@@ -2070,9 +2073,21 @@ export type Database = {
           owner_name: string
         }[]
       }
+      get_public_property: { Args: { p_slug: string }; Returns: Json }
       set_property_cover: {
         Args: { p_media: string; p_property: string }
         Returns: undefined
+      }
+      submit_public_inquiry: {
+        Args: {
+          p_consent: boolean
+          p_email: string
+          p_message: string
+          p_name: string
+          p_phone: string
+          p_slug: string
+        }
+        Returns: string
       }
       write_audit: {
         Args: {

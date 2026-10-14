@@ -19,6 +19,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Eye, EyeOff, GripVertical, ImagePlus, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { stripImageMetadata } from "@/lib/media/strip-metadata";
 import { cn } from "@/lib/utils";
 import { addPropertyMedia, deletePropertyMedia, reorderPropertyMedia, setCoverMedia, setMediaPublic } from "../actions";
 
@@ -32,18 +33,7 @@ export interface ManagedPhoto {
 
 const MAX_BYTES = 15 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const EXTENSION: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" };
-
-async function readDimensions(file: File): Promise<{ width?: number; height?: number }> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const size = { width: bitmap.width, height: bitmap.height };
-    bitmap.close();
-    return size;
-  } catch {
-    return {};
-  }
-}
+const EXTENSION: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 function PhotoTile({
   photo,
@@ -135,10 +125,16 @@ export function PhotoManager({ propertyId, organizationId, initialPhotos }: { pr
       } else if (file.size > MAX_BYTES) {
         toast.error(t("tooLarge", { name: file.name }));
       } else {
-        const path = `${organizationId}/${propertyId}/${crypto.randomUUID()}.${EXTENSION[file.type]}`;
-        const { error } = await supabase.storage.from("property-media").upload(path, file, { contentType: file.type });
-        if (error) toast.error(t("uploadFailed", { name: file.name }));
-        else uploaded.push({ path, ...(await readDimensions(file)) });
+        try {
+          // A metaadat (EXIF, GPS) nem kerülhet fel: a nyilvános oldalon pontos címet árulna el.
+          const clean = await stripImageMetadata(file);
+          const path = `${organizationId}/${propertyId}/${crypto.randomUUID()}.${EXTENSION[clean.type]}`;
+          const { error } = await supabase.storage.from("property-media").upload(path, clean.blob, { contentType: clean.type });
+          if (error) toast.error(t("uploadFailed", { name: file.name }));
+          else uploaded.push({ path, width: clean.width, height: clean.height });
+        } catch {
+          toast.error(t("uploadFailed", { name: file.name }));
+        }
       }
       setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
     }

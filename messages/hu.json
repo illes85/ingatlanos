@@ -1368,5 +1368,81 @@
       "signBuyer": "Érdeklődő aláírása",
       "signAgent": "Ügynök aláírása"
     }
+  },
+  "publicPage": {
+    "notFoundTitle": "Az oldal nem érhető el",
+    "perMonth": "/hó",
+    "yes": "Igen",
+    "no": "Nem",
+    "groundFloor": "Földszint",
+    "description": "Leírás",
+    "morePhotos": "További fotók",
+    "contact": "Kapcsolat",
+    "agentRole": "Ingatlanközvetítő",
+    "license": "Névjegyzéki szám: {number}",
+    "call": "Hívás",
+    "email": "E-mail",
+    "footer": "Az ingatlan adatai tájékoztató jellegűek. Az oldalt a Kulcs rendszerrel készítették.",
+    "facts": {
+      "area": "Alapterület",
+      "rooms": "Szobák",
+      "bathrooms": "Fürdőszobák",
+      "floor": "Emelet",
+      "elevator": "Lift",
+      "lot": "Telek",
+      "year": "Építés éve",
+      "condition": "Állapot",
+      "heating": "Fűtés",
+      "parking": "Parkolás",
+      "energy": "Energetika",
+      "balcony": "Erkély",
+      "terrace": "Terasz",
+      "garden": "Kertkapcsolat",
+      "utilities": "Rezsi",
+      "commonCost": "Közös költség"
+    },
+    "inquiry": {
+      "title": "Érdeklődöm az ingatlan iránt",
+      "cta": "Érdeklődöm",
+      "name": "Név",
+      "phone": "Telefonszám",
+      "email": "E-mail-cím",
+      "message": "Üzenet",
+      "trap": "Ezt a mezőt hagyd üresen",
+      "consent": "Hozzájárulok, hogy a megadott adataimat az ingatlanközvetítő az érdeklődésem kezelése céljából kezelje.",
+      "submit": "Üzenet küldése",
+      "sentTitle": "Köszönjük, megkaptuk!",
+      "sentBody": "Az ügynök hamarosan felveszi veled a kapcsolatot.",
+      "errors": {
+        "name": "Add meg a neved",
+        "contact": "Adj meg telefonszámot vagy e-mail-címet",
+        "email": "Az e-mail-cím formátuma nem megfelelő",
+        "consent": "A küldéshez el kell fogadnod az adatkezelést",
+        "tooLong": "Túl hosszú szöveg",
+        "generic": "A küldés nem sikerült, próbáld újra később.",
+        "rateLimited": "Túl sok üzenetet küldtél, próbáld újra egy óra múlva."
+      }
+    },
+    "share": {
+      "button": "Megosztás",
+      "close": "Bezárás",
+      "title": "Ingatlan megosztása",
+      "description": "Nyilvános, mobilbarát oldal az ingatlanról a névjegyeddel és érdeklődési űrlappal. Az űrlapon beküldött üzenet leadként érkezik.",
+      "switchLabel": "Nyilvános oldal bekapcsolva",
+      "linkLabel": "Nyilvános link",
+      "copy": "Link másolása",
+      "copied": "A link a vágólapra került.",
+      "copyFailed": "A másolás nem sikerült, jelöld ki és másold kézzel.",
+      "open": "Megnyitás",
+      "enabled": "A nyilvános oldal bekapcsolva.",
+      "disabled": "A nyilvános oldal kikapcsolva.",
+      "failed": "A művelet nem sikerült.",
+      "notPublishable": "Csak hirdetett (aktív, ajánlat alatt álló vagy foglalt) ingatlan osztható meg.",
+      "addressNote": "A címből ennyi látszik: {level}. A szerkesztőben módosítható."
+    },
+    "notFound": {
+      "title": "Ez az oldal már nem érhető el",
+      "body": "Lehet, hogy az ingatlan időközben elkelt, vagy a megosztást kikapcsolták. Kérdezd a linket küldő ügynököt."
+    }
   }
 }

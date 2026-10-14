@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireAppContext } from "@/lib/auth/session";
 import { getPropertyDetail } from "@/features/properties/detail-queries";
+import { publicEnv } from "@/lib/env";
+import { SharePanel } from "@/features/public-page/components/share-panel";
 import { DetailHeader } from "@/features/properties/components/detail-header";
 import { DetailTabs, parseDetailTab } from "@/features/properties/components/detail-tabs";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
@@ -36,6 +38,9 @@ export default async function PropertyPage({
   const rawTab = (await searchParams).ful;
   const tab = parseDetailTab(Array.isArray(rawTab) ? rawTab[0] : rawTab);
   const { property: p } = detail;
+  // Megosztani az tudja, aki szerkesztheti az ingatlant (az adatbázis is ezt őrzi).
+  const canShare = ctx.role === "owner" || p.responsible_agent_id === ctx.userId || (ctx.role === "assistant" && p.visibility === "office");
+  const tAddress = await getTranslations("properties.form.options.addressVisibility");
   const alt = [p.city, p.street].filter(Boolean).join(", ");
   const photos = detail.media
     .filter((m) => m.kind === "photo" && m.url)
@@ -43,7 +48,21 @@ export default async function PropertyPage({
 
   return (
     <div className="flex max-w-[1400px] flex-col gap-6 p-5 md:p-8">
-      <DetailHeader detail={detail} />
+      <DetailHeader
+        detail={detail}
+        shareSlot={
+          canShare ? (
+            <SharePanel
+              propertyId={p.id}
+              enabled={p.public_enabled}
+              slug={p.public_slug}
+              siteUrl={publicEnv.siteUrl}
+              publishable={["active", "under_offer", "reserved"].includes(p.status)}
+              addressLevel={tAddress(p.address_visibility)}
+            />
+          ) : null
+        }
+      />
 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
         <PropertyGallery photos={photos} propertyId={p.id} propertyType={p.property_type} alt={alt} />

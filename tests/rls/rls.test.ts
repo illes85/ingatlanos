@@ -596,3 +596,132 @@ describe("feladatok védelme (D-031)", () => {
     expect(new Date(next.due_at!).getTime()).toBeGreaterThan(Date.now());
   });
 });
+
+describe("nyilvános ingatlan-oldal (D-032)", () => {
+  const slug = `rls-teszt-${Date.now().toString(36)}`;
+  let propertyId: string;
+  let original: { public_enabled: boolean; public_slug: string | null; address_visibility: "exact" | "street" | "area" };
+  const leadIds: string[] = [];
+
+  beforeAll(async () => {
+    const { data } = await owner.client
+      .from("properties")
+      .select("id, public_enabled, public_slug, address_visibility, street, house_number")
+      .eq("status", "active")
+      .not("street", "is", null)
+      .limit(1)
+      .single();
+    propertyId = data!.id;
+    original = { public_enabled: data!.public_enabled, public_slug: data!.public_slug, address_visibility: data!.address_visibility };
+    const res = await owner.client.from("properties").update({ public_enabled: true, public_slug: slug, address_visibility: "area" }).eq("id", propertyId);
+    expect(res.error).toBeNull();
+  });
+
+  afterAll(async () => {
+    await owner.client.from("properties").update(original).eq("id", propertyId);
+    if (leadIds.length > 0) await owner.client.from("leads").delete().in("id", leadIds);
+    await owner.client.from("leads").delete().eq("property_id", propertyId).eq("source", "public_page");
+  });
+
+  it("a névtelen látogató a táblákat közvetlenül nem olvashatja", async () => {
+    for (const table of ["properties", "leads", "contacts", "property_media", "deals", "tasks"] as const) {
+      const { data } = await anon.from(table).select("id").limit(1);
+      expect(data ?? []).toHaveLength(0);
+    }
+  });
+
+  it("a nyilvános lekérdezés csak a megosztásra szánt mezőket adja, a címet a láthatóság szerint", async () => {
+    const { data } = await anon.rpc("get_public_property", { p_slug: slug });
+    const p = data as Record<string, unknown>;
+    expect(p.title).toBeTruthy();
+    expect(p.street).toBeNull();
+    expect(p.house_number).toBeNull();
+    for (const secret of ["seller_contact_id", "responsible_agent_id", "organization_id", "mandate_type", "commission_pct", "lat", "lng", "id"]) {
+      expect(p).not.toHaveProperty(secret);
+    }
+    await owner.client.from("properties").update({ address_visibility: "exact" }).eq("id", propertyId);
+    const exact = (await anon.rpc("get_public_property", { p_slug: slug })).data as Record<string, unknown>;
+    expect(exact.street).not.toBeNull();
+  });
+
+  it("kikapcsolt oldal, rossz szlag és piszkozat nem érhető el", async () => {
+    expect((await anon.rpc("get_public_property", { p_slug: "nincs-ilyen-szlag" })).data).toBeNull();
+    await owner.client.from("properties").update({ public_enabled: false }).eq("id", propertyId);
+    expect((await anon.rpc("get_public_property", { p_slug: slug })).data).toBeNull();
+    const off = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Elek", p_phone: "", p_email: "teszt@example.com", p_message: "", p_consent: true });
+    expect(off.data).toBe("not_found");
+    await owner.client.from("properties").update({ public_enabled: true, status: "draft" }).eq("id", propertyId);
+    expect((await anon.rpc("get_public_property", { p_slug: slug })).data).toBeNull();
+    await owner.client.from("properties").update({ status: "active" }).eq("id", propertyId);
+  });
+
+  it("az érdeklődés leadként érkezik a felelőshöz, érvénytelen beküldést elutasít, és korlátoz", async () => {
+    const email = `latogato${Date.now()}@example.com`;
+    const ok = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: email, p_message: "Érdekel az ingatlan", p_consent: true });
+    expect(ok.data).toBe("ok");
+    const { data: lead } = await owner.client.from("leads").select("id, source, property_id, assigned_to, status").eq("email", email).single();
+    leadIds.push(lead!.id);
+    expect(lead).toMatchObject({ source: "public_page", property_id: propertyId, status: "new" });
+
+    const noContact = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: "", p_message: "", p_consent: true });
+    expect(noContact.data).toBe("invalid");
+    const badEmail = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: "nem-email", p_message: "", p_consent: true });
+    expect(badEmail.data).toBe("invalid");
+
+    // Ugyanarról az e-mail-címről óránként legfeljebb 3 beküldés.
+    await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: email, p_message: "2", p_consent: true });
+    await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: email, p_message: "3", p_consent: true });
+    const fourth = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Látogató", p_phone: "", p_email: email, p_message: "4", p_consent: true });
+    expect(fourth.data).toBe("rate_limited");
+  });
+
+  it("a névtelen látogató csak a nyilvános jelölésű fotót érheti el, és csak bekapcsolt oldalnál", async () => {
+    // A demó fotói közös fájlokra mutatnak, ezért saját, egyedi fájlt töltünk fel.
+    const path = `${kapuOrgId}/${propertyId}/rls-public-${Date.now()}.png`;
+    const up = await owner.client.storage.from("property-media").upload(path, PIXEL_PNG, { contentType: "image/png" });
+    expect(up.error).toBeNull();
+    const media = await owner.client
+      .from("property_media")
+      .insert({ organization_id: kapuOrgId, property_id: propertyId, kind: "photo", storage_path: path, is_public: false, sort_order: 999 })
+      .select("id")
+      .single();
+    expect(media.error).toBeNull();
+    try {
+      // Nem nyilvános jelölésű fotó: nem érhető el.
+      expect((await anon.storage.from("property-media").createSignedUrl(path, 60)).error).not.toBeNull();
+      await owner.client.from("property_media").update({ is_public: true }).eq("id", media.data!.id);
+      expect((await anon.storage.from("property-media").createSignedUrl(path, 60)).error).toBeNull();
+      // Kikapcsolt oldalnál a nyilvános jelölésű fotó sem érhető el.
+      await owner.client.from("properties").update({ public_enabled: false }).eq("id", propertyId);
+      expect((await anon.storage.from("property-media").createSignedUrl(path, 60)).error).not.toBeNull();
+    } finally {
+      await owner.client.from("property_media").delete().eq("id", media.data!.id);
+      await owner.client.storage.from("property-media").remove([path]);
+      await owner.client.from("properties").update({ public_enabled: true }).eq("id", propertyId);
+    }
+  });
+
+  it("a média útvonala nem hivatkozhat másik ingatlan mappájára", async () => {
+    const { data: other } = await owner.client.from("properties").select("id").neq("id", propertyId).limit(1).single();
+    const bad = await owner.client
+      .from("property_media")
+      .insert({ organization_id: kapuOrgId, property_id: propertyId, kind: "photo", storage_path: `${kapuOrgId}/${other!.id}/x.jpg`, is_public: true });
+    expect(bad.error).not.toBeNull();
+  });
+
+  it("az érdeklődés csak névtelenül, hozzájárulással küldhető; a telefonszám egységes alakja az adatbázisban készül", async () => {
+    const noConsent = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Elek", p_phone: "", p_email: "hozzajarulas@example.com", p_message: "", p_consent: false });
+    expect(noConsent.data).toBe("invalid");
+    const asUser = await owner.client.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Teszt Elek", p_phone: "", p_email: "bejelentkezett@example.com", p_message: "", p_consent: true });
+    expect(asUser.error).not.toBeNull();
+    const direct = await anon.from("leads").insert({ organization_id: kapuOrgId, source: "public_page", full_name: "Közvetlen" });
+    expect(direct.error).not.toBeNull();
+
+    const ok = await anon.rpc("submit_public_inquiry", { p_slug: slug, p_name: "Telefonos Teszt", p_phone: "06 30 123 4567", p_email: "", p_message: "", p_consent: true });
+    expect(ok.data).toBe("ok");
+    const { data: lead } = await owner.client.from("leads").select("id, phone_normalized, consent_at").eq("full_name", "Telefonos Teszt").single();
+    leadIds.push(lead!.id);
+    expect(lead!.phone_normalized).toBe("+36301234567");
+    expect(lead!.consent_at).not.toBeNull();
+  });
+});
