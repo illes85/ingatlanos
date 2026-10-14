@@ -385,3 +385,97 @@ describe("leadek védelme (D-029)", () => {
   });
 });
 
+
+describe("ügyletek védelme (D-030)", () => {
+  const created: string[] = [];
+  afterAll(async () => {
+    if (created.length > 0) await owner.client.from("deals").delete().in("id", created);
+  });
+  const base = () => ({ organization_id: kapuOrgId, side: "seller" as const, stage: "acquisition" as const, title: "RLS ügylet" });
+
+  it("az ügynök csak a saját nevére vehet fel ügyletet, az asszisztens egyáltalán nem", async () => {
+    const own = await agent.client.from("deals").insert({ ...base(), agent_id: agent.userId }).select("id").single();
+    expect(own.error).toBeNull();
+    created.push(own.data!.id);
+
+    const other = await agent.client.from("deals").insert({ ...base(), agent_id: owner.userId });
+    expect(other.error).not.toBeNull();
+
+    const byAssistant = await assistant.client.from("deals").insert({ ...base(), agent_id: agent.userId });
+    expect(byAssistant.error).not.toBeNull();
+  });
+
+  it("eladói ügylet nem köthető olyan ingatlanhoz, amit az ügynök nem szerkeszthet", async () => {
+    const { data: foreign } = await owner.client.from("properties").select("id").neq("responsible_agent_id", agent.userId).limit(1).single();
+    const res = await agent.client.from("deals").insert({ ...base(), agent_id: agent.userId, property_id: foreign!.id });
+    expect(res.error).not.toBeNull();
+  });
+
+  it("az ügynök nem köthet ügylethez más ügynök ügyfelét", async () => {
+    const { data: foreign } = await owner.client.from("contacts").select("id").eq("owner_agent_id", owner.userId).limit(1).single();
+    const res = await agent.client.from("deals").insert({ ...base(), agent_id: agent.userId, contact_id: foreign!.id });
+    expect(res.error).not.toBeNull();
+  });
+
+  it("az ügylet nem hivatkozhat másik szervezet ingatlanára vagy ügyfelére, és a szervezete nem módosítható", async () => {
+    const { data: soloProperty } = await solo.client.from("properties").select("id").limit(1).single();
+    const { data: soloContact } = await solo.client.from("contacts").select("id").limit(1).single();
+    const bad1 = await owner.client.from("deals").insert({ ...base(), agent_id: owner.userId, property_id: soloProperty!.id });
+    expect(bad1.error).not.toBeNull();
+    const bad2 = await owner.client.from("deals").insert({ ...base(), agent_id: owner.userId, contact_id: soloContact!.id });
+    expect(bad2.error).not.toBeNull();
+
+    const ok = await owner.client.from("deals").insert({ ...base(), agent_id: owner.userId }).select("id").single();
+    expect(ok.error).toBeNull();
+    created.push(ok.data!.id);
+    const { data: soloOrg } = await solo.client.from("organizations").select("id").single();
+    const move = await owner.client.from("deals").update({ organization_id: soloOrg!.id }).eq("id", ok.data!.id).select("id");
+    expect(move.error).not.toBeNull();
+  });
+
+  it("a másik szervezet nem hozhat létre ügyletet a Kapu nevében", async () => {
+    const res = await solo.client.from("deals").insert({ ...base(), agent_id: solo.userId });
+    expect(res.error).not.toBeNull();
+  });
+
+  it("az ügylet oldala nem fordítható át, hogy más ügynök ingatlanának státuszát átírják", async () => {
+    const { data: foreign } = await owner.client.from("properties").select("id, status").neq("responsible_agent_id", agent.userId).limit(1).single();
+    const buyer = await agent.client
+      .from("deals")
+      .insert({ ...base(), side: "buyer", stage: "offer", agent_id: agent.userId, property_id: foreign!.id })
+      .select("id")
+      .single();
+    expect(buyer.error).toBeNull();
+    created.push(buyer.data!.id);
+    const flip = await agent.client.from("deals").update({ side: "seller", stage: "closed" }).eq("id", buyer.data!.id).select("id");
+    expect(flip.error).not.toBeNull();
+    const { data: after } = await owner.client.from("properties").select("status").eq("id", foreign!.id).single();
+    expect(after!.status).toBe(foreign!.status);
+  });
+
+  it("az ügynök nem adhatja tovább az ügyletét, és nem tehet ajánlatot vagy bemutatót idegen ingatlanra", async () => {
+    const own = await agent.client.from("deals").insert({ ...base(), agent_id: agent.userId }).select("id").single();
+    created.push(own.data!.id);
+    const handOver = await agent.client.from("deals").update({ agent_id: owner.userId }).eq("id", own.data!.id).select("id");
+    expect(handOver.error).not.toBeNull();
+
+    const { data: foreign } = await owner.client.from("properties").select("id").neq("responsible_agent_id", agent.userId).limit(1).single();
+    const offer = await agent.client.from("offers").insert({ organization_id: kapuOrgId, property_id: foreign!.id, amount: 1000 });
+    expect(offer.error).not.toBeNull();
+    const showing = await agent.client
+      .from("showings")
+      .insert({ organization_id: kapuOrgId, property_id: foreign!.id, agent_id: owner.userId, starts_at: new Date().toISOString() });
+    expect(showing.error).not.toBeNull();
+  });
+
+  it("a másik szervezet nem szúrhat be ajánlatot vagy bemutatót Kapu-rekordra", async () => {
+    const { data: kapuProperty } = await owner.client.from("properties").select("id").limit(1).single();
+    const { data: soloOrg } = await solo.client.from("organizations").select("id").single();
+    const offer = await solo.client.from("offers").insert({ organization_id: soloOrg!.id, property_id: kapuProperty!.id, amount: 1000 });
+    expect(offer.error).not.toBeNull();
+    const showing = await solo.client
+      .from("showings")
+      .insert({ organization_id: soloOrg!.id, property_id: kapuProperty!.id, starts_at: new Date().toISOString() });
+    expect(showing.error).not.toBeNull();
+  });
+});

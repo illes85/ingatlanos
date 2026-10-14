@@ -1138,5 +1138,72 @@
         "forbidden": "Ehhez nincs jogosultságod."
       }
     }
+  },
+  "deals": {
+    "title": "Ügyletek",
+    "sideLabel": "Oldal",
+    "sides": {
+      "seller": "Eladói oldal",
+      "buyer": "Vevői oldal"
+    },
+    "stats": {
+      "open": "Nyitott ügylet",
+      "weighted": "Súlyozott érték"
+    },
+    "newDeal": "Új ügylet",
+    "addDeal": "Ügylet",
+    "untitled": "Cím nélküli ügylet",
+    "days": "{count} nap",
+    "confirmClose": "Lezárod az ügyletet? Megnyertként kerül a Lezárva oszlopba, az ingatlan pedig eladott lesz.",
+    "moved": "Áthelyezve: {stage}",
+    "moveFailed": "Az áthelyezés nem sikerült. Ehhez az ügylethez nincs jogosultságod, vagy hiba történt.",
+    "form": {
+      "titleNew": "Új ügylet",
+      "subtitleSeller": "Eladói oldal: egy megbízás megszerzésétől az adásvételig.",
+      "subtitleBuyer": "Vevői oldal: az igényfelméréstől a szerződésig.",
+      "property": "Ingatlan",
+      "contact": "Ügyfél",
+      "stage": "Kezdő szakasz",
+      "title": "Elnevezés",
+      "titleHint": "Ingatlan vagy ügyfél nélkül kötelező.",
+      "value": "Várható érték (M Ft)",
+      "probability": "Lezárási esély (%)",
+      "probabilityHint": "Üresen hagyva a szakasz alapértéke számít.",
+      "closeDate": "Várható zárás",
+      "agent": "Felelős",
+      "notes": "Jegyzet",
+      "submitNew": "Ügylet felvétele",
+      "submitEdit": "Módosítások mentése",
+      "errors": {
+        "required": "Add meg az elnevezést, vagy válassz ingatlant vagy ügyfelet.",
+        "choice": "Válassz a listából.",
+        "number": "Adj meg érvényes számot.",
+        "date": "Adj meg érvényes dátumot.",
+        "tooLong": "Túl hosszú.",
+        "stage": "Ez a szakasz nem tartozik ehhez az oldalhoz.",
+        "generic": "A mentés nem sikerült. Próbáld újra.",
+        "forbidden": "Ehhez nincs jogosultságod."
+      }
+    },
+    "detail": {
+      "title": "Ügylet",
+      "back": "Vissza az ügyletekhez",
+      "untitled": "Cím nélküli ügylet",
+      "status": {
+        "open": "Nyitott",
+        "won": "Megnyert",
+        "lost": "Elveszett"
+      },
+      "lostReason": "Az elvesztés oka: {reason}",
+      "markLost": "Elveszett",
+      "lostPrompt": "Miért veszett el az ügylet? (nem kötelező)",
+      "markedLost": "Az ügylet elveszettként lezárva.",
+      "reopen": "Újranyitás",
+      "reopened": "Az ügylet újra nyitott.",
+      "failed": "A művelet nem sikerült.",
+      "history": "Szakasztörténet",
+      "moved": "{from} → {to}",
+      "created": "Felvéve: {to}"
+    }
   }
 }

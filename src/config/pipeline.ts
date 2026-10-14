@@ -46,3 +46,19 @@ export function agingLevel(daysInStage: number): AgingLevel {
   if (daysInStage >= 8) return "aging";
   return "fresh";
 }
+
+/** Alapértelmezett lezárási valószínűség szakaszonként (%), ha az ügyletnél nincs megadva (súlyozott érték). */
+export const DEFAULT_PROBABILITY: Record<DealStage, number> = {
+  acquisition: 10,
+  assessment: 20,
+  mandate_signed: 35,
+  listed: 45,
+  new: 5,
+  needs_assessment: 15,
+  showings: 30,
+  offer: 60,
+  financing: 80,
+  deposit: 80,
+  contract: 90,
+  closed: 100,
+};
