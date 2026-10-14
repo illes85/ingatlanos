@@ -84,7 +84,8 @@
     "groupProperties": "Ingatlanok",
     "groupContacts": "Ügyfelek",
     "searching": "Keresés…",
-    "hint": "Navigálás ↑↓ · megnyitás ↵ · bezárás Esc"
+    "hint": "Navigálás ↑↓ · megnyitás ↵ · bezárás Esc",
+    "groupLeads": "Leadek"
   },
   "plans": {
     "start": "Start",

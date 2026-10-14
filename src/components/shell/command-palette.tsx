@@ -4,9 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Command } from "cmdk";
-import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, CalendarPlus, Inbox, Search, UserPlus } from "lucide-react";
+import { Building2, CalendarPlus, Inbox, KanbanSquare, ListTodo, Search, UserPlus } from "lucide-react";
 import { ALL_NAV } from "@/config/navigation";
 import { Dialog, DialogTitle } from "@/components/ui/overlay";
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -18,10 +17,12 @@ import { NavIcon } from "./nav-icons";
 import { useShell } from "./shell-context";
 
 const ACTIONS = [
-  { key: "newProperty", icon: Building2 },
-  { key: "newContact", icon: UserPlus },
-  { key: "newLead", icon: Inbox },
-  { key: "newShowing", icon: CalendarPlus },
+  { key: "newProperty", icon: Building2, href: "/ingatlanok/uj" },
+  { key: "newContact", icon: UserPlus, href: "/ugyfelek/uj" },
+  { key: "newLead", icon: Inbox, href: "/leadek/uj" },
+  { key: "newShowing", icon: CalendarPlus, href: "/naptar/uj" },
+  { key: "newDeal", icon: KanbanSquare, href: "/ugyletek/uj" },
+  { key: "newTask", icon: ListTodo, href: "/feladatok/uj" },
 ] as const;
 
 const itemClass =
@@ -102,15 +103,24 @@ export function CommandPalette() {
                 </Command.Group>
               ) : null}
 
+              {results && results.leads.length > 0 ? (
+                <Command.Group heading={t("palette.groupLeads")} className={groupClass}>
+                  {results.leads.map((l) => (
+                    <Command.Item key={l.id} value={`l-${l.id}`} onSelect={() => go("/leadek")} className={itemClass}>
+                      <Inbox size={18} className="text-muted" />
+                      <span className="flex-1 truncate font-semibold text-ink">{l.name}</span>
+                      <span className="text-12 text-muted">{l.detail}</span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              ) : null}
+
               <Command.Group heading={t("palette.groupActions")} className={groupClass}>
-                {ACTIONS.map(({ key, icon: Icon }) => (
+                {ACTIONS.map(({ key, icon: Icon, href }) => (
                   <Command.Item
                     key={key}
                     value={t(`shell.${key}`)}
-                    onSelect={() => {
-                      close();
-                      toast(t(`shell.${key}`), { description: t("common.featureSoon") });
-                    }}
+                    onSelect={() => go(href)}
                     className={itemClass}
                   >
                     <Icon size={18} className="text-primary" />

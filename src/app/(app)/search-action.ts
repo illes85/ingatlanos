@@ -7,6 +7,7 @@ import { formatShortAddress } from "@/lib/format";
 export interface SearchResult {
   properties: { id: string; code: string; label: string; price: number }[];
   contacts: { id: string; name: string; detail: string }[];
+  leads: { id: string; name: string; detail: string }[];
 }
 
 /**
@@ -15,13 +16,13 @@ export interface SearchResult {
  */
 export async function searchEverything(rawQuery: string): Promise<SearchResult> {
   const query = rawQuery.trim().slice(0, 64);
-  if (query.length < 2) return { properties: [], contacts: [] };
+  if (query.length < 2) return { properties: [], contacts: [], leads: [] };
 
   const ctx = await requireAppContext();
   const supabase = await createClient();
   const pattern = `%${query.toLowerCase().replace(/[%_\\]/g, (m) => `\\${m}`)}%`;
 
-  const [properties, contacts] = await Promise.all([
+  const [properties, contacts, leads] = await Promise.all([
     supabase
       .from("properties")
       .select("id, code, city, district, street, price")
@@ -37,6 +38,13 @@ export async function searchEverything(rawQuery: string): Promise<SearchResult> 
       .ilike("full_name", pattern)
       .order("full_name")
       .limit(6),
+    supabase
+      .from("leads")
+      .select("id, full_name, phone, email")
+      .eq("organization_id", ctx.organization.id)
+      .ilike("full_name", pattern)
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   return {
@@ -51,5 +59,6 @@ export async function searchEverything(rawQuery: string): Promise<SearchResult> 
       name: c.full_name ?? "",
       detail: c.phone ?? "",
     })),
+    leads: (leads.data ?? []).map((l) => ({ id: l.id, name: l.full_name ?? "", detail: l.phone ?? l.email ?? "" })),
   };
 }
