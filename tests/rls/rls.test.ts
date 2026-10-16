@@ -882,3 +882,103 @@ describe("idővonal-bejegyzés láthatósága (D-035)", () => {
     expect(forged.error).not.toBeNull();
   });
 });
+
+describe("1. fázis záró szigorítás (D-036)", () => {
+  const svc = () => createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+
+  it("az owner sem írhatja a csomagot, a kreditet és a próbaidőt, de a nevét igen", async () => {
+    const { data: before } = await owner.client.from("organizations").select("name, plan, ai_credit_balance").single();
+    const plan = await owner.client.from("organizations").update({ plan: "office" }).eq("id", kapuOrgId);
+    expect(plan.error).not.toBeNull();
+    const credit = await owner.client.from("organizations").update({ ai_credit_balance: 999999 }).eq("id", kapuOrgId);
+    expect(credit.error).not.toBeNull();
+    const trial = await owner.client.from("organizations").update({ trial_ends_at: "2099-01-01T00:00:00Z" }).eq("id", kapuOrgId);
+    expect(trial.error).not.toBeNull();
+    const { data: after } = await owner.client.from("organizations").select("plan, ai_credit_balance").single();
+    expect(after).toEqual({ plan: before!.plan, ai_credit_balance: before!.ai_credit_balance });
+
+    const rename = await owner.client.from("organizations").update({ name: before!.name }).eq("id", kapuOrgId);
+    expect(rename.error).toBeNull();
+  });
+
+  it("másik szervezet ownere nem vehet fel aktív tagot, csak meghívhat; a meghívást maga a meghívott fogadja el", async () => {
+    const { data: soloOrg } = await solo.client.from("organizations").select("id").single();
+    const active = await solo.client.from("memberships").insert({ organization_id: soloOrg!.id, user_id: agent.userId, role: "owner", status: "active" });
+    expect(active.error).not.toBeNull();
+
+    const invite = await solo.client.from("memberships").insert({ organization_id: soloOrg!.id, user_id: agent.userId, role: "agent", status: "invited" });
+    try {
+      expect(invite.error).toBeNull();
+      // az owner nem aktiválhatja a meghívást a meghívott helyett
+      const forced = await solo.client.from("memberships").update({ status: "active" }).eq("organization_id", soloOrg!.id).eq("user_id", agent.userId);
+      expect(forced.error).not.toBeNull();
+      // a meghívott a saját meghívását látja, és elfogadhatja
+      const accepted = await agent.client.rpc("accept_invitation", { p_org: soloOrg!.id });
+      expect(accepted.data).toBe(true);
+    } finally {
+      await svc().from("memberships").delete().eq("organization_id", soloOrg!.id).eq("user_id", agent.userId);
+    }
+  });
+
+  it("az utolsó aktív owner nem fokozható le és nem törölhető", async () => {
+    const demote = await owner.client.from("memberships").update({ role: "agent" }).eq("organization_id", kapuOrgId).eq("user_id", owner.userId);
+    expect(demote.error).not.toBeNull();
+    const remove = await owner.client.from("memberships").delete().eq("organization_id", kapuOrgId).eq("user_id", owner.userId).select();
+    expect(remove.error !== null || (remove.data ?? []).length === 0).toBe(true);
+    const { data: still } = await owner.client.from("memberships").select("role").eq("user_id", owner.userId).eq("organization_id", kapuOrgId).single();
+    expect(still!.role).toBe("owner");
+  });
+
+  it("a kollégák havi jutalékcélja nem olvasható, a sajátod igen", async () => {
+    const others = await assistant.client.from("profiles").select("id, monthly_commission_goal");
+    expect(others.error).not.toBeNull();
+    const own = await agent.client.rpc("my_commission_goal");
+    expect(own.error).toBeNull();
+  });
+
+  it("az ügynök nem vehet fel ingatlant más nevére, és a nyilvános mezők felvételkor nem állíthatók", async () => {
+    const base = { organization_id: kapuOrgId, code: "", title: "Védelmi teszt ingatlan", property_type: "flat" as const, price: 1, city: "Budapest" };
+    const foreign = await agent.client.from("properties").insert({ ...base, responsible_agent_id: owner.userId });
+    expect(foreign.error).not.toBeNull();
+
+    const own = await agent.client
+      .from("properties")
+      .insert({ ...base, responsible_agent_id: agent.userId, public_enabled: true, public_slug: "kamu-link-teszt-123", status: "active" })
+      .select("id, public_enabled, public_slug")
+      .single();
+    try {
+      expect(own.error).toBeNull();
+      expect(own.data!.public_enabled).toBe(false);
+      expect(own.data!.public_slug).toBeNull();
+      expect((await anon.rpc("get_public_property", { p_slug: "kamu-link-teszt-123" })).data).toBeNull();
+    } finally {
+      if (own.data) await svc().from("properties").delete().eq("id", own.data.id);
+    }
+  });
+
+  it("a dokumentum nem mutathat idegen fájlra, és a naptáresemény nem vehető fel más nevére", async () => {
+    const docPath = await agent.client
+      .from("documents")
+      .insert({ organization_id: kapuOrgId, kind: "other" as never, title: "Kalóz", storage_path: `${kapuOrgId}/${crypto.randomUUID()}/titkos.pdf` });
+    expect(docPath.error).not.toBeNull();
+
+    const event = await agent.client
+      .from("calendar_events")
+      .insert({ organization_id: kapuOrgId, title: "Hamis esemény", starts_at: new Date().toISOString(), owner_id: owner.userId });
+    expect(event.error).not.toBeNull();
+  });
+
+  it("a lead eredete és hozzájárulása kliensről nem hamisítható; az audit-naplóba kliens nem írhat", async () => {
+    const forged = await agent.client.from("leads").insert({ organization_id: kapuOrgId, source: "public_page", full_name: "Hamis lead" });
+    expect(forged.error).not.toBeNull();
+    const audit = await agent.client.rpc("write_audit", { p_org: kapuOrgId, p_action: "role_change", p_entity_type: "membership", p_entity_id: agent.userId });
+    expect(audit.error).not.toBeNull();
+  });
+
+  it("névtelenül csak a két nyilvános függvény hívható", async () => {
+    const cover = await anon.rpc("set_property_cover", { p_property: crypto.randomUUID(), p_media: crypto.randomUUID() } as never);
+    expect(cover.error).not.toBeNull();
+    const unknownSlug = await anon.rpc("get_public_property", { p_slug: "nincs-ilyen-link-12345" });
+    expect(unknownSlug.error).toBeNull();
+  });
+});

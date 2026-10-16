@@ -28,7 +28,8 @@ const emailSchema = z.email();
 
 function safeNext(next: FormDataEntryValue | null): string {
   const value = typeof next === "string" ? next : "";
-  return value.startsWith("/") && !value.startsWith("//") ? value : "/ma";
+  // Csak alkalmazáson belüli útvonal: a visszaper jel és a vezérlőkarakterek a böngészőben //-nek számítanának.
+  return /^\/(?![/\\])[A-Za-z0-9\-_/?=&.%#]*$/.test(value) ? value : "/ma";
 }
 
 export async function signInWithPassword(_: AuthFormState, formData: FormData): Promise<AuthFormState> {

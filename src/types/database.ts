@@ -2041,6 +2041,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { p_org: string }; Returns: boolean }
       contact_directory: {
         Args: { p_limit?: number; p_org: string; p_query?: string }
         Returns: {
@@ -2074,6 +2075,7 @@ export type Database = {
         }[]
       }
       get_public_property: { Args: { p_slug: string }; Returns: Json }
+      my_commission_goal: { Args: never; Returns: number }
       set_property_cover: {
         Args: { p_media: string; p_property: string }
         Returns: undefined

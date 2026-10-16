@@ -22,13 +22,14 @@ export async function nominatimGeocode(baseUrl: string, query: GeocodeQuery): Pr
     const response = await fetch(`${baseUrl.replace(/\/$/, "")}/search?${params}`, {
       headers: { "User-Agent": "Kulcs/1.0 (ingatlan CRM; geokódolás)", Accept: "application/json" },
       signal: AbortSignal.timeout(TIMEOUT_MS),
+      redirect: "error",
     });
     if (!response.ok) return null;
     const rows = (await response.json()) as { lat?: string; lon?: string; addresstype?: string }[];
     const hit = rows[0];
     const lat = Number(hit?.lat);
     const lng = Number(hit?.lon);
-    if (!hit || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    if (!hit || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
     const exact = Boolean(query.street) && ["house", "building", "road"].includes(hit.addresstype ?? "");
     return { lat, lng, precision: exact ? "exact" : "approximate", provider: "nominatim" };
   } catch {

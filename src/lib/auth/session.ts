@@ -39,12 +39,15 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, email, monthly_commission_goal, active_organization_id")
+    .select("id, full_name, email, active_organization_id")
     .eq("id", userId)
     .single();
 
   // A JWT törölt felhasználónál is érvényes marad (pl. seed újrafuttatása után): profil nélkül elavult a munkamenet.
   if (!profile) return "stale";
+
+  // A kollégák jutalékcélja nem olvasható; a sajátot külön függvény adja.
+  const { data: goal } = await supabase.rpc("my_commission_goal");
 
   const { data: memberships } = await supabase
     .from("memberships")
@@ -65,7 +68,7 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
     userId,
     email: profile?.email ?? null,
     fullName: profile?.full_name ?? "",
-    monthlyCommissionGoal: profile?.monthly_commission_goal ?? null,
+    monthlyCommissionGoal: goal === null || goal === undefined ? null : Number(goal),
     organization: {
       id: org.id,
       name: org.name,
