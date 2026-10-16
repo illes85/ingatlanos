@@ -1439,7 +1439,10 @@
       "disabled": "A nyilvános oldal kikapcsolva.",
       "failed": "A művelet nem sikerült.",
       "notPublishable": "Csak hirdetett (aktív, ajánlat alatt álló vagy foglalt) ingatlan osztható meg.",
-      "addressNote": "A címből ennyi látszik: {level}. A szerkesztőben módosítható."
+      "addressNote": "A címből ennyi látszik: {level}. A szerkesztőben módosítható.",
+      "renew": "Új link",
+      "renewConfirm": "Új linket készítünk, a régi azonnal megszűnik. Folytatod?",
+      "renewed": "Az új link kész, a régi már nem működik."
     },
     "notFound": {
       "title": "Ez az oldal már nem érhető el",

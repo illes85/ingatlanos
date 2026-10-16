@@ -854,3 +854,31 @@ afterAll(async () => {
   const svc = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
   await svc.from("notifications").delete().or("body.like.RLS %,body.like.Értesítés teszt%,body.like.E2E%,title.like.RLS %,body.eq.Teszt Látogató,body.eq.Telefonos Teszt,body.like.Értesítős Teszt%");
 });
+
+describe("idővonal-bejegyzés láthatósága (D-035)", () => {
+  it("az ügynök csak olyan ügyfélhez vehet fel bejegyzést, amelyet lát", async () => {
+    const { data: mine } = await agent.client.from("contacts").select("id").limit(1).single();
+    const { data: all } = await owner.client.from("contacts").select("id, owner_agent_id").neq("owner_agent_id", agent.userId).limit(1).single();
+
+    const foreign = await agent.client
+      .from("activities")
+      .insert({ organization_id: kapuOrgId, contact_id: all!.id, type: "note", title: "Idegen ügyfél", actor_id: agent.userId });
+    expect(foreign.error).not.toBeNull();
+
+    const own = await agent.client
+      .from("activities")
+      .insert({ organization_id: kapuOrgId, contact_id: mine!.id, type: "note", title: "Saját ügyfél", actor_id: agent.userId })
+      .select("id")
+      .single();
+    expect(own.error).toBeNull();
+    await owner.client.from("activities").delete().eq("id", own.data!.id);
+  });
+
+  it("az ügynök másnak nem írhat a nevében bejegyzést", async () => {
+    const { data: mine } = await agent.client.from("contacts").select("id").limit(1).single();
+    const forged = await agent.client
+      .from("activities")
+      .insert({ organization_id: kapuOrgId, contact_id: mine!.id, type: "note", title: "Hamis szerző", actor_id: owner.userId });
+    expect(forged.error).not.toBeNull();
+  });
+});

@@ -49,6 +49,16 @@ test("az ingatlan megosztható, a nyilvános oldal belépés nélkül látszik, 
     const { data: lead } = await admin().from("leads").select("source, property_id, status, full_name").eq("email", email).single();
     expect(lead).toMatchObject({ source: "public_page", property_id: property!.id, status: "new", full_name: "E2E Látogató" });
 
+    // Új link: a régi azonnal megszűnik, az új működik.
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Új link" }).click();
+    await expect(async () => expect(await link.inputValue()).not.toBe(url)).toPass();
+    const newUrl = await link.inputValue();
+    await vp.goto(new URL(url).pathname.replace(/^/, "http://localhost:3000"));
+    await expect(vp.getByText("Ez az oldal már nem érhető el")).toBeVisible();
+    await vp.goto(new URL(newUrl).pathname.replace(/^/, "http://localhost:3000"));
+    await expect(vp.getByRole("heading", { level: 1, name: property!.title })).toBeVisible();
+
     // Kikapcsolás után az oldal nem érhető el.
     await page.getByRole("switch", { name: "Nyilvános oldal bekapcsolva" }).click();
     await expect(page.getByLabel("Nyilvános link")).toHaveCount(0);

@@ -114,3 +114,34 @@ export async function setPublicPage(propertyId: string, enabled: boolean): Promi
   }
   return { ok: false, error: "generic" };
 }
+
+/** Új nyilvános link: a régi azonnal megszűnik (kiszivárgott link ellen). Csak bekapcsolt oldalon. */
+export async function regeneratePublicLink(propertyId: string): Promise<ShareResult> {
+  const ctx = await requireAppContext();
+  if (!UUID.test(propertyId)) return { ok: false, error: "generic" };
+  const supabase = await createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, title, public_enabled")
+    .eq("id", propertyId)
+    .eq("organization_id", ctx.organization.id)
+    .maybeSingle();
+  if (!property) return { ok: false, error: "forbidden" };
+  if (!property.public_enabled) return { ok: false, error: "generic" };
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabase
+      .from("properties")
+      .update({ public_slug: makePublicSlug(property.title) })
+      .eq("id", propertyId)
+      .eq("organization_id", ctx.organization.id)
+      .select("public_slug");
+    if (!error && data && data.length > 0) {
+      revalidatePath(`/ingatlanok/${propertyId}`);
+      return { ok: true, slug: data[0]!.public_slug ?? null };
+    }
+    if (error?.code === "23505") continue;
+    return { ok: false, error: error?.code === "42501" || (!error && !data?.length) ? "forbidden" : "generic" };
+  }
+  return { ok: false, error: "generic" };
+}

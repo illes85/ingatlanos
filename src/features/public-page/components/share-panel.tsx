@@ -4,11 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Copy, ExternalLink, Share2 } from "lucide-react";
+import { Copy, ExternalLink, RefreshCw, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/overlay";
 import { cn } from "@/lib/utils";
-import { setPublicPage } from "../actions";
+import { regeneratePublicLink, setPublicPage } from "../actions";
 
 interface SharePanelProps {
   propertyId: string;
@@ -42,6 +42,20 @@ export function SharePanel({ propertyId, enabled, slug, siteUrl, publishable, ad
       toast.success(isOn ? t("disabled") : t("enabled"));
       router.refresh();
     });
+
+  const renew = () => {
+    if (!window.confirm(t("renewConfirm"))) return;
+    startTransition(async () => {
+      const result = await regeneratePublicLink(propertyId);
+      if (!result.ok) {
+        toast.error(t("failed"));
+        return;
+      }
+      setCurrentSlug(result.slug);
+      toast.success(t("renewed"));
+      router.refresh();
+    });
+  };
 
   const copy = async () => {
     try {
@@ -102,6 +116,10 @@ export function SharePanel({ propertyId, enabled, slug, siteUrl, publishable, ad
                   <ExternalLink size={16} aria-hidden="true" />
                   {t("open")}
                 </a>
+              </Button>
+              <Button variant="ghost" onClick={renew} disabled={pending}>
+                <RefreshCw size={16} aria-hidden="true" />
+                {t("renew")}
               </Button>
             </div>
             <p className="text-13 text-muted">{t("addressNote", { level: addressLevel })}</p>

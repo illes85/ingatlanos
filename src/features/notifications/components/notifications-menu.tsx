@@ -77,7 +77,7 @@ export function NotificationsMenu() {
       await supabase.realtime.setAuth(session.access_token);
       if (cancelled) return;
       channel = supabase
-        .channel(`notifications:${userId}`)
+        .channel(`notifications:${userId}:${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
