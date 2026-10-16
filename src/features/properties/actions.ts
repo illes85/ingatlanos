@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { requireAppContext } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatMillions } from "@/lib/format";
+import { geocodeAddress } from "@/lib/geocoding";
 import { parsePropertyForm, toPropertyRow, type PropertyField, type PropertyFormError, type PropertyInput } from "./schema";
 
 export interface PropertyFormState {
@@ -41,9 +42,15 @@ export async function createProperty(_: PropertyFormState, formData: FormData): 
 
   const supabase = await createClient();
   const responsible = input.responsibleAgentId ?? (ctx.role === "assistant" ? null : ctx.userId);
+  const row = toPropertyRow(input);
+  // Kézzel megadott koordinátát nem írunk felül; különben a címből számoljuk (hiba esetén a mentés megy tovább).
+  if (row.lat === null || row.lng === null) {
+    const point = await geocodeAddress({ postalCode: row.postal_code, city: row.city, district: row.district, street: row.street, houseNumber: row.house_number });
+    if (point) Object.assign(row, { lat: point.lat, lng: point.lng });
+  }
   const { data: created, error } = await supabase
     .from("properties")
-    .insert({ ...toPropertyRow(input), code: "", organization_id: ctx.organization.id, responsible_agent_id: responsible })
+    .insert({ ...row, code: "", organization_id: ctx.organization.id, responsible_agent_id: responsible })
     .select("id")
     .single();
   if (error || !created) return { error: "generic" };
@@ -80,13 +87,26 @@ export async function updateProperty(propertyId: string, _: PropertyFormState, f
   const input = parsed.data;
 
   const supabase = await createClient();
-  const { data: before } = await supabase.from("properties").select("price").eq("id", propertyId).eq("organization_id", ctx.organization.id).maybeSingle();
+  const { data: before } = await supabase.from("properties").select("price, lat, lng, postal_code, city, district, street, house_number").eq("id", propertyId).eq("organization_id", ctx.organization.id).maybeSingle();
   if (!before) return { error: "forbidden" };
 
   // A felelős és a láthatóság mezői csak annak jelennek meg, aki váltathatja; ha hiányoznak, nem érintjük őket.
   const row = toPropertyRow(input);
   if (!formData.has("responsibleAgentId")) delete row.responsible_agent_id;
   if (!formData.has("visibility")) delete row.visibility;
+  // Ha nincs kézi koordináta, és a cím változott vagy még nincs pozíció, újraszámoljuk.
+  if (row.lat === null || row.lng === null) {
+    const addressChanged =
+      before.city !== row.city || before.district !== row.district || before.street !== row.street ||
+      before.house_number !== row.house_number || before.postal_code !== row.postal_code;
+    if (addressChanged || before.lat === null || before.lng === null) {
+      const point = await geocodeAddress({ postalCode: row.postal_code, city: row.city, district: row.district, street: row.street, houseNumber: row.house_number });
+      if (point) Object.assign(row, { lat: point.lat, lng: point.lng });
+      else if (!addressChanged) Object.assign(row, { lat: before.lat, lng: before.lng });
+    } else {
+      Object.assign(row, { lat: before.lat, lng: before.lng });
+    }
+  }
 
   const { data: updated, error } = await supabase
     .from("properties")
