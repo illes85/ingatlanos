@@ -1098,8 +1098,56 @@ describe("csomagok, kredit és fizetés (D-037…D-040)", () => {
       expect(b.data![0].replayed).toBe(true);
       // Előbb a havi zseb fogy (10), a maradék a vásárolt zsebből.
       expect(a.data![0]).toMatchObject({ monthly_left: 0, purchased_left: 180 });
+
+      // A napló összege a nyitó egyenleg (10) és a mozgások után egyezik a két zseb összegével.
+      const { data: now } = await admin.from("organizations").select("ai_credit_balance, ai_credit_purchased").eq("id", id).single();
+      const { data: ledger } = await admin.from("credit_ledger").select("delta, delta_purchased").eq("organization_id", id);
+      expect(ledger!.reduce((sum, r) => sum + r.delta, 0) + 10).toBe(now!.ai_credit_balance + now!.ai_credit_purchased);
+      expect(ledger!.reduce((sum, r) => sum + r.delta_purchased, 0)).toBe(now!.ai_credit_purchased);
     } finally {
       await admin.from("organizations").delete().eq("id", org!.id);
     }
+  });
+
+  it("csomagváltás: idegen előfizetés, második élő előfizetés, elavult esemény és fel-le-fel váltás", async () => {
+    const admin = svc();
+    const mk = async (slug: string) =>
+      (await admin.from("organizations").insert({ name: `Váltás ${slug}`, type: "individual", slug: `${slug}-${Date.now()}`, plan: "start", ai_credit_balance: 10, ai_credit_monthly: 10, ai_credit_period_granted: 10 }).select("id").single()).data!.id;
+    const a = await mk("a");
+    const b = await mk("b");
+    try {
+      const change = (org: string, plan: "pro" | "pro_ai", extra: Record<string, unknown> = {}) =>
+        admin.rpc("apply_plan_change", { p_org: org, p_plan: plan, p_interval: "month", p_seats: 1, p_status: "active", p_provider: "stripe", p_provider_subscription_id: `sub_${org}`, ...extra } as never);
+      expect((await change(a, "pro")).error).toBeNull();
+
+      // egy másik szervezet nem hivatkozhat az előfizetésre
+      const mismatch = await admin.rpc("apply_plan_change", { p_org: b, p_plan: "pro", p_interval: "month", p_seats: 1, p_status: "active", p_provider: "stripe", p_provider_subscription_id: `sub_${a}` });
+      expect(mismatch.error?.message).toBe("subscription_org_mismatch");
+
+      // második élő előfizetés ugyanarra a szervezetre
+      const second = await admin.rpc("apply_plan_change", { p_org: a, p_plan: "pro_ai", p_interval: "month", p_seats: 1, p_status: "active", p_provider: "stripe", p_provider_subscription_id: "sub_masodik" });
+      expect(second.error?.message).toBe("subscription_conflict");
+
+      // elavult (régebbi) esemény nem írja felül az újabbat
+      expect((await change(a, "pro_ai", { p_synced_at: "2030-01-02T00:00:00Z" })).error).toBeNull();
+      expect((await change(a, "pro", { p_synced_at: "2030-01-01T00:00:00Z" })).error).toBeNull();
+      expect((await admin.from("organizations").select("plan").eq("id", a).single()).data!.plan).toBe("pro_ai");
+
+      // fel-le-fel váltás ugyanabban a hónapban nem gyűjt további kreditet
+      const afterUp = (await admin.from("organizations").select("ai_credit_balance").eq("id", a).single()).data!.ai_credit_balance;
+      await change(a, "pro", { p_synced_at: "2030-01-03T00:00:00Z" });
+      await change(a, "pro_ai", { p_synced_at: "2030-01-04T00:00:00Z" });
+      const afterRound = (await admin.from("organizations").select("ai_credit_balance").eq("id", a).single()).data!.ai_credit_balance;
+      expect(afterRound).toBeLessThanOrEqual(afterUp);
+    } finally {
+      await admin.from("organizations").delete().in("id", [a, b]);
+    }
+  });
+
+  it("az ügynök sem a kreditnaplót, sem a csomagváltás audit-sorát nem olvassa", async () => {
+    const ledger = await agent.client.from("credit_ledger").select("id");
+    expect(ledger.data ?? []).toHaveLength(0);
+    const audit = await agent.client.from("audit_log").select("id").eq("action", "plan_change");
+    expect(audit.data ?? []).toHaveLength(0);
   });
 });

@@ -54,3 +54,21 @@ revoke all on function app.properties_plan_limit() from public, anon, authentica
 -- A BEFORE triggerek névsorrendben futnak: before_write → guard_assignment → insert_guard → plan_limit → updated_at.
 create trigger properties_plan_limit before insert or update of status on public.properties
   for each row execute function app.properties_plan_limit();
+
+-- Aktív ingatlanok száma a csomagoldalhoz: a szervezet tagja láthatja a számot (a más ügynök privát ingatlana is
+-- beleszámít a limitbe, ezért kell security definer), tartalmat nem ad ki.
+create or replace function public.active_listing_count(p_org uuid)
+returns integer
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select count(*)::integer
+  from public.properties p
+  where p.organization_id = p_org
+    and p.status in ('active', 'under_offer', 'reserved')
+    and app.is_member(p_org);
+$$;
+revoke all on function public.active_listing_count(uuid) from public, anon;
+grant execute on function public.active_listing_count(uuid) to authenticated;

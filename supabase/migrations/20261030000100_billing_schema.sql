@@ -38,7 +38,7 @@ create table public.subscriptions (
   current_period_end timestamptz,
   cancel_at_period_end boolean not null default false,   -- lemondás az időszak végén; addig a csomag él
   canceled_at timestamptz,
-  provider_synced_at timestamptz,                        -- a legutóbb alkalmazott szolgáltatói állapot ideje (sorrenden kívüli webhook ellen)
+  provider_synced_at timestamptz,                        -- a legutóbb alkalmazott szolgáltatói esemény ideje (a Stripe `event.created`; sorrenden kívüli webhook ellen)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint subscriptions_paid_plan check (plan <> 'start'),

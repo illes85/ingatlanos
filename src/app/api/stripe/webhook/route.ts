@@ -14,7 +14,10 @@ export async function POST(request: Request) {
   }
   if (billing.mode !== "stripe") return new Response("Nem található", { status: 404 });
 
+  // Aláírás-ellenőrzés előtt ne olvassunk be korlátlan méretű törzset.
+  if (Number(request.headers.get("content-length") ?? 0) > 1_000_000) return new Response("Túl nagy kérés", { status: 413 });
   const rawBody = await request.text();
+  if (rawBody.length > 1_000_000) return new Response("Túl nagy kérés", { status: 413 });
   let event;
   try {
     event = billing.parseWebhook(rawBody, request.headers.get("stripe-signature"));

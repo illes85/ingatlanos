@@ -36,6 +36,12 @@ export async function processBillingEvent(event: BillingEvent): Promise<"process
       .eq("id", row!.id);
     return "processed";
   } catch (error) {
+    // Második élő előfizetés: újrapróbálás nem segít (a Stripe 3 napig ismételné). Lezártnak jelöljük, a hiba a naplóban
+    // marad, és kézi teendő a duplikált előfizetés lemondása/visszatérítése (D-040).
+    if (error instanceof Error && error.message.includes("subscription_conflict")) {
+      await admin.from("billing_events").update({ processed_at: new Date().toISOString(), last_error: "subscription_conflict: kézi beavatkozás kell" }).eq("id", row!.id);
+      return "processed";
+    }
     await admin
       .from("billing_events")
       .update({ last_error: error instanceof Error ? error.message.slice(0, 500) : "ismeretlen hiba" })
@@ -71,6 +77,7 @@ async function applyEvent(admin: Admin, event: Exclude<BillingEvent, { type: "ig
         p_provider_subscription_id: event.subscriptionId ?? undefined,
         p_period_start: event.periodStart ?? undefined,
         p_period_end: event.periodEnd ?? undefined,
+        p_synced_at: event.createdAt ?? undefined,
       });
       fail(error);
       return event.organizationId;
@@ -92,6 +99,7 @@ async function applyEvent(admin: Admin, event: Exclude<BillingEvent, { type: "ig
         p_period_start: ("periodStart" in event ? event.periodStart : null) ?? undefined,
         p_period_end: ("periodEnd" in event ? event.periodEnd : null) ?? undefined,
         p_cancel_at_period_end: event.type === "subscription.updated" ? event.cancelAtPeriodEnd : sub.cancel_at_period_end,
+        p_synced_at: event.createdAt ?? undefined,
       });
       fail(error);
       return sub.organization_id;

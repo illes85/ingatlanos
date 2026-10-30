@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { CREDIT_PACKS, PAID_PLANS, normalizeSeats, type CreditPackId } from "@/config/plans";
+import { CREDIT_PACKS, PAID_PLANS, listMonthlyNet, normalizeSeats, type CreditPackId } from "@/config/plans";
 import { serverEnv } from "@/lib/env";
 import { requireAppContext, type AppContext } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -25,12 +25,15 @@ const subscriptionSchema = z.object({
   seats: z.coerce.number().int().min(1).max(200).default(1),
 });
 
-/** A fizetési műveleteket csak az owner végezheti; a MOCK szimuláció élesben csak demó módban engedett (D-037). */
+/**
+ * A fizetési műveleteket csak az owner végezheti. A MOCK szimuláció élesben csak demó módban ÉS demó szervezetnél engedett
+ * (különben bárki ingyen csomagot és kreditet kapna; D-037).
+ */
 async function authorize(): Promise<{ ctx: AppContext; billing: BillingProvider } | null> {
   const ctx = await requireAppContext();
   if (ctx.role !== "owner") return null;
   const billing = getBilling();
-  if (billing.mode === "mock" && process.env.NODE_ENV === "production" && !serverEnv().demoMode) return null;
+  if (billing.mode === "mock" && process.env.NODE_ENV === "production" && !(serverEnv().demoMode && ctx.organization.isDemo)) return null;
   return { ctx, billing };
 }
 
@@ -56,11 +59,26 @@ async function checkoutContext(ctx: AppContext): Promise<CheckoutContext> {
 async function liveSubscription(organizationId: string) {
   const { data } = await createAdminClient()
     .from("subscriptions")
-    .select("id, plan, billing_interval, seats, provider, provider_subscription_id, provider_customer_id, current_period_start, current_period_end, cancel_at_period_end")
+    .select("id, status, plan, billing_interval, seats, provider, provider_subscription_id, provider_customer_id, current_period_start, current_period_end, cancel_at_period_end")
     .eq("organization_id", organizationId)
-    .in("status", ["active", "past_due"])
+    .in("status", ["active", "past_due", "incomplete"])
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
   return data;
+}
+
+async function closeSubscription(organizationId: string, sub: NonNullable<Awaited<ReturnType<typeof liveSubscription>>>) {
+  const { error } = await createAdminClient().rpc("apply_plan_change", {
+    p_org: organizationId,
+    p_plan: sub.plan,
+    p_interval: sub.billing_interval,
+    p_seats: sub.seats,
+    p_status: "canceled",
+    p_provider: sub.provider,
+    p_provider_subscription_id: sub.provider_subscription_id ?? undefined,
+  });
+  if (error) throw new Error(error.message);
 }
 
 /** Csomagválasztás: új előfizetés (Stripe-fizetőoldal / MOCK) vagy meglévő módosítása. */
@@ -74,7 +92,13 @@ export async function startSubscription(formData: FormData): Promise<void> {
   const request = { kind: "subscription", plan, interval, seats } as const;
 
   try {
-    const existing = await liveSubscription(ctx.organization.id);
+    let existing = await liveSubscription(ctx.organization.id);
+    if (existing && existing.status === "incomplete" && existing.provider === "stripe") return done("hiba"); // folyamatban lévő fizetés (pl. 3DS)
+    // Üzemmód-váltás után maradt MOCK előfizetést előbb lezárjuk, hogy ne kerüljön két élő előfizetés a szervezetre.
+    if (existing && existing.provider !== billing.mode) {
+      await closeSubscription(ctx.organization.id, existing);
+      existing = null;
+    }
     if (existing && existing.plan === plan && existing.billing_interval === interval && existing.seats === seats && !existing.cancel_at_period_end) {
       return done("sikeres");
     }
@@ -97,7 +121,8 @@ export async function startSubscription(formData: FormData): Promise<void> {
     }
 
     if (existing?.provider === "stripe" && existing.provider_subscription_id) {
-      await billing.changeSubscription(existing.provider_subscription_id, request);
+      const chargeNow = listMonthlyNet(plan, seats) >= listMonthlyNet(existing.plan, existing.seats) || existing.billing_interval !== interval;
+      await billing.changeSubscription(existing.provider_subscription_id, request, chargeNow);
       return done("sikeres");
     }
     const result = await billing.createCheckout(await checkoutContext(ctx), request);
@@ -144,28 +169,31 @@ export async function cancelSubscription(): Promise<void> {
   const auth = await authorize();
   if (!auth) return done("hiba");
   const { ctx, billing } = auth;
+
+  let ok = false;
   try {
     const sub = await liveSubscription(ctx.organization.id);
-    if (!sub) return done("hiba");
-    if (sub.provider === "stripe" && sub.provider_subscription_id) {
+    if (sub?.provider === "stripe" && sub.provider_subscription_id) {
+      // A végleges állapotot a Stripe-webhook hozza (a helyi óra szerinti írás eldobhatná a későbbi eseményt).
       await billing.cancelAtPeriodEnd(sub.provider_subscription_id);
-      // A végleges állapotot a webhook hozza; addig is jelezzük a felületen.
+      ok = true;
+    } else if (sub) {
+      const { error } = await createAdminClient().rpc("apply_plan_change", {
+        p_org: ctx.organization.id,
+        p_plan: sub.plan,
+        p_interval: sub.billing_interval,
+        p_seats: sub.seats,
+        p_status: sub.status === "past_due" ? "past_due" : "active",
+        p_provider: sub.provider,
+        p_provider_subscription_id: sub.provider_subscription_id ?? undefined,
+        p_period_start: sub.current_period_start ?? undefined,
+        p_period_end: sub.current_period_end ?? undefined,
+        p_cancel_at_period_end: true,
+      });
+      ok = !error;
     }
-    const { error } = await createAdminClient().rpc("apply_plan_change", {
-      p_org: ctx.organization.id,
-      p_plan: sub.plan,
-      p_interval: sub.billing_interval,
-      p_seats: sub.seats,
-      p_status: "active",
-      p_provider: sub.provider,
-      p_provider_subscription_id: sub.provider_subscription_id ?? undefined,
-      p_period_start: sub.current_period_start ?? undefined,
-      p_period_end: sub.current_period_end ?? undefined,
-      p_cancel_at_period_end: true,
-    });
-    if (error) throw new Error(error.message);
   } catch {
-    return done("hiba");
+    ok = false;
   }
-  return done("lemondva");
+  return done(ok ? "lemondva" : "hiba");
 }

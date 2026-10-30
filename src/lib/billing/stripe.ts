@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { CREDIT_PACKS, isPaidPlan, normalizeSeats, quotePlan, type BillingInterval, type CreditPackId, type PaidPlan } from "@/config/plans";
 import { publicEnv } from "@/lib/env";
-import type { BillingEvent, BillingProvider, CheckoutContext, CheckoutRequest } from "./types";
+import type { BillingEvent, BillingEventBody, BillingProvider, CheckoutContext, CheckoutRequest } from "./types";
 
 export interface StripeConfig {
   secretKey: string;
@@ -22,7 +22,8 @@ function periodOf(sub: Stripe.Subscription) {
 
 function mapStatus(status: Stripe.Subscription.Status): "active" | "past_due" | "canceled" | "incomplete" {
   if (status === "active" || status === "trialing") return "active";
-  if (status === "past_due" || status === "unpaid") return "past_due";
+  if (status === "past_due") return "past_due";
+  // Az „unpaid” a Stripe-ban fizetetlen, nem újrapróbált előfizetés: jogosultságot nem ad, de később újra aktiválódhat.
   if (status === "canceled") return "canceled";
   return "incomplete";
 }
@@ -88,7 +89,7 @@ export function createStripeBilling(config: StripeConfig): BillingProvider {
       return { type: "redirect" as const, url: session.url };
     },
 
-    async changeSubscription(subscriptionId: string, request) {
+    async changeSubscription(subscriptionId: string, request, chargeNow: boolean) {
       const current = await stripe.subscriptions.retrieve(subscriptionId);
       const item = current.items.data[0];
       if (!item) throw new Error("Az előfizetésnek nincs tétele.");
@@ -97,7 +98,11 @@ export function createStripeBilling(config: StripeConfig): BillingProvider {
       const line = subscriptionLine(request);
       await stripe.subscriptions.update(subscriptionId, {
         items: [{ id: item.id, price_data: { ...line.price_data, product: typeof item.price.product === "string" ? item.price.product : item.price.product.id }, tax_rates: taxRates }],
-        proration_behavior: "create_prorations",
+        // Felváltás: azonnali számla, és ha a fizetés elbukik, a váltás meg sem történik (nincs fizetetlen jogosultság).
+        // Visszalépés: nincs arányosítás és visszatérítés, az új ár a következő számlától él (D-039).
+        ...(chargeNow
+          ? { proration_behavior: "always_invoice" as const, payment_behavior: "error_if_incomplete" as const }
+          : { proration_behavior: "none" as const }),
         cancel_at_period_end: false,
         metadata,
       });
@@ -118,6 +123,10 @@ export function createStripeBilling(config: StripeConfig): BillingProvider {
 
 /** Egységtesztelhető: a Stripe-esemény → szolgáltatófüggetlen esemény. */
 export function normalizeEvent(event: Stripe.Event): BillingEvent {
+  return { ...normalizeBody(event), createdAt: iso(event.created) };
+}
+
+function normalizeBody(event: Stripe.Event): BillingEventBody {
   const eventId = event.id;
   switch (event.type) {
     case "checkout.session.completed": {

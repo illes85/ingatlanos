@@ -404,6 +404,7 @@ declare
   v_monthly integer;
   v_balance integer;
   v_granted integer;
+  v_diff integer;
   v_trial_active boolean;
   v_step interval := case p_interval when 'year' then interval '1 year' else interval '1 month' end;
 begin
@@ -510,10 +511,19 @@ begin
     from public.organizations o where o.id = p_org;
     if v_monthly > v_granted then
       -- Felváltás: csak a hónapban még jóvá nem írt különbözet (fel-le-fel váltással nem gyűjthető).
-      insert into public.credit_ledger (organization_id, delta, reason)
-      values (p_org, v_monthly - v_granted, 'plan_change_grant');
+      -- Fizetős csomagról fizetősre váltáskor (a Stripe csak időarányosan számláz) a különbözet is időarányos,
+      -- így a hónap végi felváltás + visszaváltás nem hoz olcsón nagy keretet. Első vásárlásnál teljes keret jár.
+      v_diff := v_monthly - v_granted;
+      if v_org.plan <> 'start' then
+        v_diff := ceil(v_diff * extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - (now() at time zone 'Europe/Budapest')))
+                              / extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - date_trunc('month', now() at time zone 'Europe/Budapest'))))::integer;
+      end if;
+      if v_diff > 0 then
+        insert into public.credit_ledger (organization_id, delta, reason)
+        values (p_org, v_diff, 'plan_change_grant');
+      end if;
       update public.organizations
-         set ai_credit_balance = ai_credit_balance + (v_monthly - v_granted), ai_credit_period_granted = v_monthly
+         set ai_credit_balance = ai_credit_balance + v_diff, ai_credit_period_granted = v_monthly
        where id = p_org;
     elsif v_balance > v_monthly then
       -- Leváltás: a havi zseb az új keretre vágódik (a vásárolt zseb marad).

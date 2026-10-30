@@ -22,7 +22,7 @@ export type CheckoutResult =
   | { type: "simulated" };
 
 /** A webhookból normalizált, szolgáltatófüggetlen esemény; az alkalmazás ezt dolgozza fel. */
-export type BillingEvent =
+export type BillingEventBody =
   | {
       type: "subscription.activated";
       eventId: string;
@@ -58,11 +58,19 @@ export type BillingEvent =
   | { type: "credits.purchased"; eventId: string; organizationId: string; packId: CreditPackId }
   | { type: "ignored"; eventId: string };
 
+/** `createdAt`: a szolgáltató esemény-ideje; ezzel védekezünk a sorrenden kívül érkező események ellen. */
+export type BillingEvent = BillingEventBody & { createdAt: string | null };
+
 export interface BillingProvider {
   readonly mode: BillingMode;
   createCheckout(ctx: CheckoutContext, request: CheckoutRequest): Promise<CheckoutResult>;
   /** Meglévő előfizetés csomagjának módosítása (arányosított elszámolással); a végleges állapotot a webhook hozza. */
-  changeSubscription(subscriptionId: string, request: Extract<CheckoutRequest, { kind: "subscription" }>): Promise<void>;
+  changeSubscription(
+    subscriptionId: string,
+    request: Extract<CheckoutRequest, { kind: "subscription" }>,
+    /** true: azonnali, arányosított számlázás (a váltás csak sikeres fizetéssel lép életbe); false: visszalépés, arányosítás és visszatérítés nélkül. */
+    chargeNow: boolean,
+  ): Promise<void>;
   /** Az időszak végén lépjen életbe a lemondás (D-039). */
   cancelAtPeriodEnd(subscriptionId: string): Promise<void>;
   /** Aláírás-ellenőrzés + normalizálás. Érvénytelen aláírásnál kivételt dob. */

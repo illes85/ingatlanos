@@ -57,7 +57,7 @@ describe("Stripe-események normalizálása", () => {
   it("előfizetés-frissítés: státusz és lemondás", () => {
     const sub = (status: string, cancel: boolean) => ({ id: "sub_1", status, cancel_at_period_end: cancel, metadata: {}, items: { data: [{ current_period_end: 1_702_600_000 }] } });
     expect(normalizeEvent(ev("customer.subscription.updated", sub("trialing", false)))).toMatchObject({ status: "active", cancelAtPeriodEnd: false });
-    expect(normalizeEvent(ev("customer.subscription.updated", sub("unpaid", true)))).toMatchObject({ status: "past_due", cancelAtPeriodEnd: true });
+    expect(normalizeEvent(ev("customer.subscription.updated", sub("past_due", true)))).toMatchObject({ status: "past_due", cancelAtPeriodEnd: true });
     expect(normalizeEvent(ev("customer.subscription.deleted", { id: "sub_1" }))).toMatchObject({ type: "subscription.ended", subscriptionId: "sub_1" });
   });
 
@@ -66,6 +66,18 @@ describe("Stripe-események normalizálása", () => {
     expect(ok).toMatchObject({ plan: "pro_ai", interval: "month", seats: 1 });
     const bad = normalizeEvent(ev("customer.subscription.updated", { id: "s", status: "active", cancel_at_period_end: false, metadata: { plan: "start", interval: "month" }, items: { data: [] } }));
     expect(bad).not.toHaveProperty("plan");
+  });
+
+  it("az esemény ideje átkerül a normalizált eseménybe (sorrenden kívüli események ellen)", () => {
+    const e = normalizeEvent({ ...ev("customer.subscription.deleted", { id: "sub_1" }), created: 1_700_000_000 } as unknown as Stripe.Event);
+    expect(e.createdAt).toBe(new Date(1_700_000_000 * 1000).toISOString());
+  });
+
+  it("az „unpaid” előfizetés nem ad jogosultságot", () => {
+    const e = normalizeEvent(ev("customer.subscription.updated", { id: "s", status: "unpaid", cancel_at_period_end: false, metadata: {}, items: { data: [] } }));
+    expect(e).toMatchObject({ type: "subscription.updated" });
+    expect((e as { status: string }).status).not.toBe("active");
+    expect((e as { status: string }).status).not.toBe("past_due");
   });
 
   it("ismeretlen eseménytípus figyelmen kívül marad", () => {

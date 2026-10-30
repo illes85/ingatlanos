@@ -1,5 +1,5 @@
 import "server-only";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import type { AppContext } from "@/lib/auth/session";
 
 export interface BillingOverview {
@@ -15,9 +15,6 @@ export interface BillingOverview {
   activeListings: number;
 }
 
-/** Aktív (hirdetett) ingatlan: az `app.is_listing_active()` státuszlistájával egyezik (D-038). */
-const ACTIVE_STATUSES = ["active", "under_offer", "reserved"] as const;
-
 export async function getBillingOverview(ctx: AppContext): Promise<BillingOverview> {
   const supabase = await createClient();
   const isOwner = ctx.role === "owner";
@@ -28,18 +25,16 @@ export async function getBillingOverview(ctx: AppContext): Promise<BillingOvervi
       ? supabase
           .from("subscriptions")
           .select("plan, billing_interval, seats, provider, current_period_end, cancel_at_period_end")
+          .eq("organization_id", ctx.organization.id)
           .in("status", ["active", "past_due"])
           .maybeSingle()
       : Promise.resolve({ data: null }),
     isOwner
-      ? supabase.from("credit_ledger").select("id, created_at, delta, reason").order("created_at", { ascending: false }).limit(15)
+      ? supabase.from("credit_ledger").select("id, created_at, delta, reason").eq("organization_id", ctx.organization.id).order("created_at", { ascending: false }).limit(15)
       : Promise.resolve({ data: [] }),
-    // A számláló a szervezet összes aktív ingatlanát nézi (a más ügynök privát ingatlana is beleszámít a limitbe).
-    createAdminClient()
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-      .eq("organization_id", ctx.organization.id)
-      .in("status", [...ACTIVE_STATUSES]),
+    // A számláló a szervezet összes aktív ingatlanát nézi (a más ügynök privát ingatlana is beleszámít a limitbe);
+    // ezt tagságot ellenőrző adatbázis-függvény adja, a felhasználó munkamenetével.
+    supabase.rpc("active_listing_count", { p_org: ctx.organization.id }),
   ]);
 
   const s = sub.data;
@@ -55,6 +50,6 @@ export async function getBillingOverview(ctx: AppContext): Promise<BillingOvervi
         }
       : null,
     ledger: (ledger.data ?? []).map((l) => ({ id: l.id, createdAt: l.created_at, delta: l.delta, reason: l.reason })),
-    activeListings: listings.count ?? 0,
+    activeListings: listings.data ?? 0,
   };
 }

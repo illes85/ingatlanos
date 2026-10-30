@@ -2147,6 +2147,7 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { p_org: string }; Returns: boolean }
+      active_listing_count: { Args: { p_org: string }; Returns: number }
       apply_plan_change: {
         Args: {
           p_cancel_at_period_end?: boolean
