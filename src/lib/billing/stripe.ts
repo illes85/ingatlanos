@@ -24,7 +24,7 @@ function mapStatus(status: Stripe.Subscription.Status): "active" | "past_due" | 
   if (status === "active" || status === "trialing") return "active";
   if (status === "past_due") return "past_due";
   // Az „unpaid” a Stripe-ban fizetetlen, nem újrapróbált előfizetés: jogosultságot nem ad, de később újra aktiválódhat.
-  if (status === "canceled") return "canceled";
+  if (status === "canceled" || status === "incomplete_expired") return "canceled";
   return "incomplete";
 }
 

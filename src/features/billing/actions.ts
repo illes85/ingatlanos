@@ -183,7 +183,7 @@ export async function cancelSubscription(): Promise<void> {
         p_plan: sub.plan,
         p_interval: sub.billing_interval,
         p_seats: sub.seats,
-        p_status: sub.status === "past_due" ? "past_due" : "active",
+        p_status: sub.status,
         p_provider: sub.provider,
         p_provider_subscription_id: sub.provider_subscription_id ?? undefined,
         p_period_start: sub.current_period_start ?? undefined,

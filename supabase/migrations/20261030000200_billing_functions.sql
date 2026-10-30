@@ -405,6 +405,9 @@ declare
   v_balance integer;
   v_granted integer;
   v_diff integer;
+  v_frac numeric;
+  v_ps timestamptz;
+  v_pe timestamptz;
   v_trial_active boolean;
   v_step interval := case p_interval when 'year' then interval '1 year' else interval '1 month' end;
 begin
@@ -443,7 +446,12 @@ begin
       raise exception 'subscription_org_mismatch' using errcode = '42501';
     end if;
     if v_sub.provider_synced_at is not null and p_synced_at < v_sub.provider_synced_at then
-      return v_sub.id;                                    -- elavult (sorrenden kívül érkezett) állapot
+      -- Elavult (sorrenden kívül érkezett) állapot: a csomagot nem írja felül, de az üres időszakot kitölti.
+      update public.subscriptions
+         set current_period_start = coalesce(current_period_start, p_period_start),
+             current_period_end = coalesce(current_period_end, p_period_end)
+       where id = v_sub.id;
+      return v_sub.id;
     end if;
     if v_sub.status = 'canceled' and p_status <> 'canceled' then
       return v_sub.id;                                    -- lezárt előfizetés nem éled újra
@@ -515,8 +523,15 @@ begin
       -- így a hónap végi felváltás + visszaváltás nem hoz olcsón nagy keretet. Első vásárlásnál teljes keret jár.
       v_diff := v_monthly - v_granted;
       if v_org.plan <> 'start' then
-        v_diff := ceil(v_diff * extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - (now() at time zone 'Europe/Budapest')))
-                              / extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - date_trunc('month', now() at time zone 'Europe/Budapest'))))::integer;
+        -- Arány: a naptári hónap és az előfizetés számlázási időszaka hátralévő hányada közül a kisebb
+        -- (a Stripe a számlázási időszakra arányosít; a megújulás előtti napi felváltás így nem hoz teljes kiegészítést).
+        v_frac := extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - (now() at time zone 'Europe/Budapest')))
+                / extract(epoch from ((date_trunc('month', now() at time zone 'Europe/Budapest') + interval '1 month') - date_trunc('month', now() at time zone 'Europe/Budapest')));
+        select s.current_period_start, s.current_period_end into v_ps, v_pe from public.subscriptions s where s.id = v_sub_id;
+        if v_ps is not null and v_pe is not null and v_pe > v_ps then
+          v_frac := least(v_frac, greatest(0, extract(epoch from (v_pe - now())) / extract(epoch from (v_pe - v_ps))));
+        end if;
+        v_diff := ceil(v_diff * v_frac)::integer;
       end if;
       if v_diff > 0 then
         insert into public.credit_ledger (organization_id, delta, reason)
