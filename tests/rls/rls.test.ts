@@ -1150,4 +1150,30 @@ describe("csomagok, kredit és fizetés (D-037…D-040)", () => {
     const audit = await agent.client.from("audit_log").select("id").eq("action", "plan_change");
     expect(audit.data ?? []).toHaveLength(0);
   });
+
+  it("felhasználónként egyetlen próba: a második szervezet Starton indul, a trial_claims kliensről nem érhető el (D-041)", async () => {
+    const admin = svc();
+    const email = `trial-${Date.now()}@kulcs-demo.test`;
+    const { data: created } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+    const userId = created.user!.id;
+    const { client } = await signIn(email);
+    const orgIds: string[] = [];
+    try {
+      const first = await client.rpc("create_organization", { p_name: "Próba teszt egy", p_type: "individual" });
+      const second = await client.rpc("create_organization", { p_name: "Próba teszt kettő", p_type: "individual" });
+      expect(first.error).toBeNull();
+      expect(second.error).toBeNull();
+      orgIds.push(first.data!, second.data!);
+      const { data: orgs } = await admin.from("organizations").select("id, trial_plan, ai_credit_balance, plan").in("id", orgIds);
+      const a = orgs!.find((o) => o.id === first.data)!;
+      const b = orgs!.find((o) => o.id === second.data)!;
+      expect(a).toMatchObject({ trial_plan: "pro_ai", ai_credit_balance: 400 });
+      expect(b).toMatchObject({ trial_plan: null, ai_credit_balance: 10, plan: "start" });
+      const claims = await client.from("trial_claims" as never).select("*");
+      expect(claims.error).not.toBeNull();
+    } finally {
+      if (orgIds.length) await admin.from("organizations").delete().in("id", orgIds);
+      await admin.auth.admin.deleteUser(userId);
+    }
+  });
 });

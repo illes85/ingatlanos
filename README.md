@@ -77,7 +77,7 @@ A magic link és a regisztrációs e-mailek a felhős Supabase-en át mennek; az
 - **Fizetés MOCK módban** (alapértelmezett, kulcsok nélkül): a `/csomagok` oldalon a csomagváltás és a kreditvásárlás azonnal, szimulálva történik.
 - **Stripe teszt módban:** töltsd ki a három `STRIPE_…` változót a `.env.local`-ban, majd fejlesztésben `stripe listen --forward-to localhost:3000/api/stripe/webhook` (a kiírt `whsec_…` titkot add meg `STRIPE_WEBHOOK_SECRET`-ként). Események: `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`.
 - **Kredit:** a havi keret hónap végén lejár, a vásárolt kredit nem. A kreditmozgások az irodavezetőnek a `/csomagok` oldalon láthatók.
-- **Migrációk:** `20261030000100…300` (előfizetések, kreditzsebek, függvények, limit-trigger). A felhős projektre `npx supabase db push`-sal kerülnek, utána `npm run db:types` és `npm run db:seed`.
+- **Migrációk:** `20261030000100…400` (előfizetések, kreditzsebek, függvények, limit-trigger, egyszeri próba). A felhős projektre `npx supabase db push`-sal kerülnek, utána `npm run db:types` és `npm run db:seed`.
 
 ## Demó adatok
 
@@ -122,4 +122,4 @@ messages/hu.json         minden felhasználói szöveg
 - A jogosultsági szabályok adatbázis-triggerekben és RLS-ben élnek, nem csak a felületen; mindegyiket RLS-teszt (`npm run test:rls`) rögzíti.
 - A nyilvános oldal csak két szűk adatbázis-függvényen át ér el adatot (nincs táblahozzáférés); a feltöltött fotók helyadata (EXIF/GPS) feltöltés előtt törlődik.
 - Értesítést csak adatbázis-kiváltó hoz létre; a felhasználó csak az olvasottságot írhatja.
-- Ismert korlátok és a döntések indoklása: [`DECISIONS.md`](DECISIONS.md) (D-001 … D-040).
+- Ismert korlátok és a döntések indoklása: [`DECISIONS.md`](DECISIONS.md) (D-001 … D-041).
