@@ -88,6 +88,21 @@ export function createStripeBilling(config: StripeConfig): BillingProvider {
       return { type: "redirect" as const, url: session.url };
     },
 
+    async changeSubscription(subscriptionId: string, request) {
+      const current = await stripe.subscriptions.retrieve(subscriptionId);
+      const item = current.items.data[0];
+      if (!item) throw new Error("Az előfizetésnek nincs tétele.");
+      const seats = normalizeSeats(request.plan, request.seats);
+      const metadata = { ...current.metadata, plan: request.plan, interval: request.interval, seats: String(seats) };
+      const line = subscriptionLine(request);
+      await stripe.subscriptions.update(subscriptionId, {
+        items: [{ id: item.id, price_data: { ...line.price_data, product: typeof item.price.product === "string" ? item.price.product : item.price.product.id }, tax_rates: taxRates }],
+        proration_behavior: "create_prorations",
+        cancel_at_period_end: false,
+        metadata,
+      });
+    },
+
     async cancelAtPeriodEnd(subscriptionId: string) {
       await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
     },
@@ -144,7 +159,19 @@ export function normalizeEvent(event: Stripe.Event): BillingEvent {
     }
     case "customer.subscription.updated": {
       const sub = event.data.object;
-      return { type: "subscription.updated", eventId, subscriptionId: sub.id, status: mapStatus(sub.status), cancelAtPeriodEnd: sub.cancel_at_period_end, periodEnd: periodOf(sub).end };
+      const plan = sub.metadata?.plan as PaidPlan | undefined;
+      const interval = sub.metadata?.interval;
+      return {
+        type: "subscription.updated",
+        eventId,
+        subscriptionId: sub.id,
+        status: mapStatus(sub.status),
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        periodEnd: periodOf(sub).end,
+        ...(plan && isPaidPlan(plan) && (interval === "month" || interval === "year")
+          ? { plan, interval, seats: normalizeSeats(plan, Number(sub.metadata?.seats)) }
+          : {}),
+      };
     }
     case "customer.subscription.deleted":
       return { type: "subscription.ended", eventId, subscriptionId: event.data.object.id };

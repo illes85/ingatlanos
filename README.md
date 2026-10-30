@@ -3,7 +3,7 @@
 Ingatlanos munkaállomás magyar ügynököknek és irodáknak: minden képernyő arra válaszol, mit csináljon most az ügynök, hogy hamarabb jutalékhoz jusson.
 A teljes termék- és fejlesztési specifikáció: [`KULCS_SPEC.md`](KULCS_SPEC.md). A látványterv: [`design/`](design). Az eltérések és döntések: [`DECISIONS.md`](DECISIONS.md).
 
-**Állapot:** 1. fázis (alap CRM) kész, jóváhagyásra vár. Elkészült: ingatlanok (fotókkal, térkép), ügyfelek keresési profillal, leadek és egykattintásos ügyféllé alakítás, ügyletek kanban, naptár és bemutatók (visszajelzés, nyomtatható lap), feladatok (ismétlődők), nyilvános ingatlan-oldal megosztható linkkel és érdeklődési űrlappal, valós idejű értesítések, ⌘K keresés, geokódolás. Következik a 2. fázis (csomagok, kredit, fizetés).
+**Állapot:** 1. fázis (alap CRM) kész és jóváhagyott; a 2. fázis (csomagok, kredit, fizetés) elkészült, jóváhagyásra vár. Elkészült: ingatlanok (fotókkal, térkép), ügyfelek keresési profillal, leadek és egykattintásos ügyféllé alakítás, ügyletek kanban, naptár és bemutatók (visszajelzés, nyomtatható lap), feladatok (ismétlődők), nyilvános ingatlan-oldal megosztható linkkel és érdeklődési űrlappal, valós idejű értesítések, ⌘K keresés, geokódolás. A 2. fázisban: csomagok és jogosultságok (FeatureGate, szerveroldali `requireFeature`), AI kreditrendszer (havi és vásárolt kredit, naplóval), Stripe-előfizetés teszt módban és MOCK, árazási oldal (havi/éves, nettó + ÁFA), 14 napos próbaidő, aktív ingatlan limit. Következik a 3. fázis (AI funkciók).
 
 ## Tech stack
 
@@ -33,6 +33,8 @@ Hozz létre egy Supabase projektet, majd másold a `.env.example` fájlt `.env.l
 | `DEMO_USER_PASSWORD` | tetszőleges jelszó a demó fiókokhoz |
 | `NEXT_PUBLIC_SITE_URL` | az alkalmazás nyilvános címe (a megosztási linkekhez), fejlesztésben `http://localhost:3000` |
 | `NEXT_PUBLIC_MAP_TILE_URL`, `NEXT_PUBLIC_MAP_ATTRIBUTION` | térkép-csempeszerver; élesben szolgáltatói vagy saját szerver kell (a nyilvános OSM-szerver csak fejlesztésre való) |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | opcionális, **csak teszt módú** Stripe-kulcsok. Mindhárom megadásától él a valódi Stripe; üresen a fizetés MOCK (azonnali, szimulált csomagváltás, élesben csak `DEMO_MODE=true` mellett). A kulcsokat soha ne commitold |
+| `STRIPE_TAX_RATE_ID` | opcionális: a Stripe-ban létrehozott 27%-os ÁFA-adókulcs (`txr_…`) |
 | `GEOCODER_URL` | opcionális: Nominatim-kompatibilis geokódoló szerver. Üresen a MOCK közelítő pozíciót ad a címből |
 
 Összekötés és adatbázis felépítése:
@@ -68,6 +70,15 @@ A magic link és a regisztrációs e-mailek a felhős Supabase-en át mennek; az
 | `npm run db:seed` | demó adatok újratöltése (újrafuttatható; a dátumok a mai naphoz igazodnak) |
 | `npm run db:types` | TypeScript-típusok generálása a felhős projektből (`src/types/database.ts`) |
 
+## Csomagok, kredit és fizetés (2. fázis)
+
+- **Csomagok és árak:** `src/config/plans.ts` (nettó Ft/hó, éves fizetésnél −20%, 27% ÁFA a felületen külön). Az aktív ingatlan limit és a havi kreditkeret az adatbázisban is él (`app.plan_limit`, `app.plan_monthly_credits`); az egyezést az RLS-teszt ellenőrzi.
+- **Jogosultság:** a csomagot, a kreditet és a próbaidőt kliens nem írhatja; csak szerveroldali függvények (`apply_plan_change`, `grant_credits`, `spend_credits`) módosítják. Oldalon `<FeatureGate>`, műveletnél `requireFeature()` / `assertFeature()`.
+- **Fizetés MOCK módban** (alapértelmezett, kulcsok nélkül): a `/csomagok` oldalon a csomagváltás és a kreditvásárlás azonnal, szimulálva történik.
+- **Stripe teszt módban:** töltsd ki a három `STRIPE_…` változót a `.env.local`-ban, majd fejlesztésben `stripe listen --forward-to localhost:3000/api/stripe/webhook` (a kiírt `whsec_…` titkot add meg `STRIPE_WEBHOOK_SECRET`-ként). Események: `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`.
+- **Kredit:** a havi keret hónap végén lejár, a vásárolt kredit nem. A kreditmozgások az irodavezetőnek a `/csomagok` oldalon láthatók.
+- **Migrációk:** `20261030000100…300` (előfizetések, kreditzsebek, függvények, limit-trigger). A felhős projektre `npx supabase db push`-sal kerülnek, utána `npm run db:types` és `npm run db:seed`.
+
 ## Demó adatok
 
 **Kapu Ingatlaniroda.** Kiss Anna irodavezető, aki maga is ügynök; további ügynökök: Major Eszter, Fodor Bálint és Szilágyi Péter; asszisztens: Tóth Kinga. A seed tartalma:
@@ -93,7 +104,9 @@ src/app/design/          belső design system oldal
 src/components/ui/       alapkomponensek (gomb, chip, input, kártya, overlay …)
 src/components/ai/       AI vizuális nyelv (✦ gomb, AI-kártya, javaslat, zárolt prémium)
 src/components/shell/    oldalsáv, felső sáv, mobil navigáció, ⌘K paletta
-src/features/            funkciónként: dashboard, properties, contacts, leads, deals, showings, tasks, notifications, public-page
+src/features/            funkciónként: dashboard, properties, contacts, leads, deals, showings, tasks, notifications, public-page, billing
+src/lib/billing/         fizetési réteg: interfész, MOCK, Stripe (teszt mód), kreditkönyvelés-azonosítók
+src/app/api/stripe/      Stripe-webhook (aláírás-ellenőrzött, idempotens)
 src/app/p/[slug]/        nyilvános ingatlan-oldal (belépés nélkül)
 src/config/              márka, navigáció, pipeline, csomagok, demó
 src/lib/                 Supabase kliensek, munkamenet, magyar formázók, geokódolás, média
@@ -109,4 +122,4 @@ messages/hu.json         minden felhasználói szöveg
 - A jogosultsági szabályok adatbázis-triggerekben és RLS-ben élnek, nem csak a felületen; mindegyiket RLS-teszt (`npm run test:rls`) rögzíti.
 - A nyilvános oldal csak két szűk adatbázis-függvényen át ér el adatot (nincs táblahozzáférés); a feltöltött fotók helyadata (EXIF/GPS) feltöltés előtt törlődik.
 - Értesítést csak adatbázis-kiváltó hoz létre; a felhasználó csak az olvasottságot írhatja.
-- Ismert korlátok és a döntések indoklása: [`DECISIONS.md`](DECISIONS.md) (D-001 … D-035).
+- Ismert korlátok és a döntések indoklása: [`DECISIONS.md`](DECISIONS.md) (D-001 … D-040).

@@ -10,7 +10,7 @@ import { parsePropertyForm, toPropertyRow, type PropertyField, type PropertyForm
 
 export interface PropertyFormState {
   fieldErrors?: Partial<Record<PropertyField, PropertyFormError>>;
-  error?: "generic" | "forbidden";
+  error?: "generic" | "forbidden" | "planLimit";
 }
 
 export type MediaActionResult = { ok: true } | { ok: false; error: "generic" | "forbidden" | "invalidPath" };
@@ -53,6 +53,7 @@ export async function createProperty(_: PropertyFormState, formData: FormData): 
     .insert({ ...row, code: "", organization_id: ctx.organization.id, responsible_agent_id: responsible })
     .select("id")
     .single();
+  if (error?.message === "plan_limit_reached") return { error: "planLimit" };
   if (error || !created) return { error: "generic" };
 
   if (ctx.role === "owner" || responsible === ctx.userId) await saveCommission(supabase, ctx.organization.id, created.id, input.commissionPct);
@@ -115,6 +116,7 @@ export async function updateProperty(propertyId: string, _: PropertyFormState, f
     .eq("organization_id", ctx.organization.id)
     .select("id");
   // Az RLS a nem módosítható sort csendben kihagyja: üres találat = nincs jogosultság.
+  if (error?.message === "plan_limit_reached") return { error: "planLimit" };
   if (error) return { error: "generic" };
   if (!updated || updated.length === 0) return { error: "forbidden" };
 

@@ -33,8 +33,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       tier: ctx.effectivePlan,
       isTrial,
       trialDaysLeft,
-      creditBalance: ctx.organization.aiCreditBalance,
-      creditTotal: isTrial ? 400 : ctx.organization.aiCreditMonthly,
+      creditBalance: ctx.organization.aiCreditBalance + ctx.organization.aiCreditPurchased,
+      creditTotal: (isTrial ? 400 : ctx.organization.aiCreditMonthly) + ctx.organization.aiCreditPurchased,
     },
     counts: { newLeads: leads.count ?? 0, unreadNotifications: notifications.count ?? 0 },
   };

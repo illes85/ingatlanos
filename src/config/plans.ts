@@ -147,3 +147,7 @@ export function minimumPlanFor(feature: Feature): PlanTier {
 export function activeListingLimit(plan: PlanTier): number | null {
   return PLAN_LIMITS[plan].activeListings;
 }
+
+/** A funkció kulcsa a fordítási fájlban (a pont az üzenetkulcsokban beágyazást jelentene): `ai.assistant` → `ai_assistant`. */
+export type FeatureMessageKey = Feature extends infer F ? (F extends `${infer A}.${infer B}` ? `${A}_${B}` : never) : never;
+export const featureMessageKey = (feature: Feature) => feature.replace(".", "_") as FeatureMessageKey;

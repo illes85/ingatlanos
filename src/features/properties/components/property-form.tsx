@@ -222,6 +222,14 @@ export function PropertyForm({ mode, propertyId, defaults = EMPTY_PROPERTY_VALUE
       {state.error ? (
         <p role="alert" className="text-14 font-semibold text-danger-text">
           {t(`errors.${state.error}`)}
+          {state.error === "planLimit" ? (
+            <>
+              {" "}
+              <a href="/csomagok" className="underline">
+                {t("errors.planLimitCta")}
+              </a>
+            </>
+          ) : null}
         </p>
       ) : null}
       {state.fieldErrors ? (

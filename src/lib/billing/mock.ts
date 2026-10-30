@@ -6,6 +6,9 @@ export const mockBilling: BillingProvider = {
   async createCheckout() {
     return { type: "simulated" };
   },
+  async changeSubscription() {
+    // A hívó közvetlenül az adatbázisban alkalmazza a váltást.
+  },
   async cancelAtPeriodEnd() {
     // A hívó a saját adatbázisában jelöli a lemondást; külső rendszer nincs.
   },

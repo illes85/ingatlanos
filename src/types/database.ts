@@ -200,6 +200,96 @@ export type Database = {
           },
         ]
       }
+      billing_events: {
+        Row: {
+          event_id: string
+          id: string
+          last_error: string | null
+          organization_id: string | null
+          processed_at: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          received_at: string
+          type: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          last_error?: string | null
+          organization_id?: string | null
+          processed_at?: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          received_at?: string
+          type: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          last_error?: string | null
+          organization_id?: string | null
+          processed_at?: string | null
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          received_at?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          billing_interval: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          organization_id: string
+          plan: Database["public"]["Enums"]["plan_tier"]
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          provider_synced_at: string | null
+          seats: number
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          organization_id: string
+          plan: Database["public"]["Enums"]["plan_tier"]
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          provider_synced_at?: string | null
+          seats?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          organization_id?: string
+          plan?: Database["public"]["Enums"]["plan_tier"]
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          provider_synced_at?: string | null
+          seats?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           all_day: boolean
@@ -552,8 +642,10 @@ export type Database = {
       credit_ledger: {
         Row: {
           created_at: string
+          ai_usage_id: string | null
           created_by: string | null
           delta: number
+          delta_purchased: number
           id: string
           organization_id: string
           reason: string
@@ -561,8 +653,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          ai_usage_id?: string | null
           created_by?: string | null
           delta: number
+          delta_purchased?: number
           id?: string
           organization_id: string
           reason: string
@@ -570,8 +664,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          ai_usage_id?: string | null
           created_by?: string | null
           delta?: number
+          delta_purchased?: number
           id?: string
           organization_id?: string
           reason?: string
@@ -1264,6 +1360,9 @@ export type Database = {
         Row: {
           ai_credit_balance: number
           ai_credit_monthly: number
+          ai_credit_period: string
+          ai_credit_period_granted: number
+          ai_credit_purchased: number
           brand_color: string | null
           created_at: string
           id: string
@@ -1282,6 +1381,9 @@ export type Database = {
         Insert: {
           ai_credit_balance?: number
           ai_credit_monthly?: number
+          ai_credit_period?: string
+          ai_credit_period_granted?: number
+          ai_credit_purchased?: number
           brand_color?: string | null
           created_at?: string
           id?: string
@@ -1300,6 +1402,9 @@ export type Database = {
         Update: {
           ai_credit_balance?: number
           ai_credit_monthly?: number
+          ai_credit_period?: string
+          ai_credit_period_granted?: number
+          ai_credit_purchased?: number
           brand_color?: string | null
           created_at?: string
           id?: string
@@ -2042,6 +2147,62 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { p_org: string }; Returns: boolean }
+      apply_plan_change: {
+        Args: {
+          p_cancel_at_period_end?: boolean
+          p_interval: Database["public"]["Enums"]["billing_interval"]
+          p_org: string
+          p_period_end?: string
+          p_period_start?: string
+          p_plan: Database["public"]["Enums"]["plan_tier"]
+          p_provider: Database["public"]["Enums"]["billing_provider"]
+          p_provider_customer_id?: string
+          p_provider_subscription_id?: string
+          p_seats: number
+          p_status: Database["public"]["Enums"]["subscription_status"]
+          p_synced_at?: string
+        }
+        Returns: string
+      }
+      billing_plan_config: {
+        Args: never
+        Returns: {
+          active_listing_limit: number
+          monthly_credits_per_seat: number
+          plan: Database["public"]["Enums"]["plan_tier"]
+        }[]
+      }
+      grant_credits: {
+        Args: {
+          p_amount: number
+          p_created_by?: string
+          p_org: string
+          p_reason: string
+          p_ref_id: string
+        }
+        Returns: boolean
+      }
+      grant_monthly_credits_if_due: { Args: { p_org: string }; Returns: boolean }
+      spend_credits: {
+        Args: {
+          p_amount: number
+          p_cost_usd?: number
+          p_feature: string
+          p_input_tokens?: number
+          p_is_mock?: boolean
+          p_model?: string
+          p_org: string
+          p_output_tokens?: number
+          p_ref_id?: string
+          p_user: string
+        }
+        Returns: {
+          monthly_left: number
+          purchased_left: number
+          replayed: boolean
+          usage_id: string
+        }[]
+      }
       contact_directory: {
         Args: { p_limit?: number; p_org: string; p_query?: string }
         Returns: {
@@ -2192,7 +2353,10 @@ export type Database = {
         | "withdrawn"
         | "expired"
       org_type: "individual" | "office"
+      billing_interval: "month" | "year"
+      billing_provider: "mock" | "stripe"
       plan_tier: "start" | "pro" | "pro_ai" | "office"
+      subscription_status: "incomplete" | "active" | "past_due" | "canceled"
       pmt_status: "not_started" | "in_progress" | "completed" | "expired"
       property_status:
         | "draft"
@@ -2436,7 +2600,10 @@ export const Constants = {
       offer_kind: ["offer", "counter"],
       offer_status: ["pending", "accepted", "rejected", "withdrawn", "expired"],
       org_type: ["individual", "office"],
+      billing_interval: ["month", "year"],
+      billing_provider: ["mock", "stripe"],
       plan_tier: ["start", "pro", "pro_ai", "office"],
+      subscription_status: ["incomplete", "active", "past_due", "canceled"],
       pmt_status: ["not_started", "in_progress", "completed", "expired"],
       property_status: [
         "draft",

@@ -4,7 +4,7 @@ import type { Database } from "@/types/database";
 import { publicEnv } from "@/lib/env";
 
 /** Nyilvános útvonalak — belépés nélkül is elérhetők. */
-const PUBLIC_PATHS = ["/belepes", "/regisztracio", "/auth", "/p"];
+const PUBLIC_PATHS = ["/belepes", "/regisztracio", "/auth", "/p", "/api/stripe/webhook"];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

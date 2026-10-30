@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { DEMO_ACCOUNTS } from "@/config/demo";
+import type { PlanTier } from "@/lib/auth/session";
 
 config({ path: ".env.local" });
 
@@ -980,5 +981,125 @@ describe("1. fázis záró szigorítás (D-036)", () => {
     expect(cover.error).not.toBeNull();
     const unknownSlug = await anon.rpc("get_public_property", { p_slug: "nincs-ilyen-link-12345" });
     expect(unknownSlug.error).toBeNull();
+  });
+});
+
+describe("csomagok, kredit és fizetés (D-037…D-040)", () => {
+  const svc = () => createClient<Database>(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+
+  it("a csomag, a kredit és a próbaidő oszlopait az owner sem írhatja", async () => {
+    for (const patch of [{ plan: "office" }, { ai_credit_balance: 99999 }, { ai_credit_purchased: 99999 }, { ai_credit_monthly: 99999 }, { trial_plan: "office" }, { trial_ends_at: "2099-01-01T00:00:00Z" }, { ai_credit_period_granted: 0 }]) {
+      const res = await owner.client.from("organizations").update(patch as never).eq("id", kapuOrgId);
+      expect(res.error, JSON.stringify(patch)).not.toBeNull();
+    }
+    const name = await owner.client.from("organizations").update({ settings: {} }).eq("id", kapuOrgId).select("id");
+    expect(name.error).toBeNull();
+  });
+
+  it("az előfizetést csak az owner olvashatja, és senki nem írhatja kliensről", async () => {
+    const forOwner = await owner.client.from("subscriptions").select("id");
+    expect(forOwner.error).toBeNull();
+    for (const c of [agent, assistant, solo]) {
+      const res = await c.client.from("subscriptions").select("id").eq("organization_id", kapuOrgId);
+      expect(res.data ?? []).toHaveLength(0);
+    }
+    const write = await owner.client.from("subscriptions").insert({ organization_id: kapuOrgId, plan: "office", provider: "mock", status: "active" });
+    expect(write.error).not.toBeNull();
+  });
+
+  it("a számlázási események kliensről nem érhetők el", async () => {
+    for (const c of [owner, agent]) {
+      const res = await c.client.from("billing_events").select("id");
+      expect(res.error).not.toBeNull();
+    }
+  });
+
+  it("a kreditnaplóba és az AI-naplóba kliens nem írhat", async () => {
+    const ledger = await owner.client.from("credit_ledger").insert({ organization_id: kapuOrgId, delta: 1000, reason: "adjustment" });
+    expect(ledger.error).not.toBeNull();
+    const usage = await owner.client.from("ai_usage").insert({ organization_id: kapuOrgId, feature: "ai.listing_writer", credits: 0 });
+    expect(usage.error).not.toBeNull();
+  });
+
+  it("a kredit- és csomagfüggvények kliensről nem hívhatók (owner, ügynök, névtelen sem)", async () => {
+    for (const c of [owner.client, agent.client, anon]) {
+      const spend = await c.rpc("spend_credits", { p_org: kapuOrgId, p_amount: 1, p_feature: "ai.listing_writer", p_user: owner.userId });
+      expect(spend.error).not.toBeNull();
+      const grant = await c.rpc("grant_credits", { p_org: kapuOrgId, p_amount: 500, p_reason: "purchase", p_ref_id: crypto.randomUUID() });
+      expect(grant.error).not.toBeNull();
+      const plan = await c.rpc("apply_plan_change", { p_org: kapuOrgId, p_plan: "office", p_interval: "month", p_seats: 1, p_status: "active", p_provider: "mock" });
+      expect(plan.error).not.toBeNull();
+      const monthly = await c.rpc("grant_monthly_credits_if_due", { p_org: kapuOrgId });
+      expect(monthly.error).not.toBeNull();
+      const config = await c.rpc("billing_plan_config");
+      expect(config.error).not.toBeNull();
+    }
+  });
+
+  it("az SQL-ben tükrözött limitek és keretek egyeznek a TS-konfiggal", async () => {
+    const { PLAN_LIMITS } = await import("@/config/plans");
+    const { data, error } = await svc().rpc("billing_plan_config");
+    expect(error).toBeNull();
+    for (const row of data!) {
+      expect(row.active_listing_limit).toBe(PLAN_LIMITS[row.plan as PlanTier].activeListings);
+      expect(row.monthly_credits_per_seat).toBe(PLAN_LIMITS[row.plan as PlanTier].aiCreditsMonthly);
+    }
+  });
+
+  it("Starton a 16. aktív ingatlan nem vehető fel, a piszkozat igen, fizetős csomagnál nincs limit", async () => {
+    const admin = svc();
+    const { data: org } = await admin
+      .from("organizations")
+      .insert({ name: "Limit teszt iroda", type: "individual", slug: `limit-teszt-${Date.now()}`, plan: "start" })
+      .select("id")
+      .single();
+    try {
+      const base = { organization_id: org!.id, title: "Limit teszt", property_type: "flat" as const, price: 1, city: "Budapest" };
+      const rows = Array.from({ length: 15 }, (_, i) => ({ ...base, code: `L-${i}`, status: "active" as const }));
+      expect((await admin.from("properties").insert(rows)).error).toBeNull();
+
+      const sixteenth = await admin.from("properties").insert({ ...base, code: "L-16", status: "active" });
+      expect(sixteenth.error?.message).toBe("plan_limit_reached");
+
+      const draft = await admin.from("properties").insert({ ...base, code: "L-17", status: "draft" }).select("id").single();
+      expect(draft.error).toBeNull();
+      const activate = await admin.from("properties").update({ status: "active" }).eq("id", draft.data!.id);
+      expect(activate.error?.message).toBe("plan_limit_reached");
+
+      const upgrade = await admin.rpc("apply_plan_change", { p_org: org!.id, p_plan: "pro", p_interval: "month", p_seats: 1, p_status: "active", p_provider: "mock" });
+      expect(upgrade.error).toBeNull();
+      expect((await admin.from("properties").update({ status: "active" }).eq("id", draft.data!.id)).error).toBeNull();
+    } finally {
+      await admin.from("organizations").delete().eq("id", org!.id);
+    }
+  });
+
+  it("a kredit nem megy negatívba, az ismételt vásárlás és költés idempotens, a napló egyezik az egyenleggel", async () => {
+    const admin = svc();
+    const { data: org } = await admin
+      .from("organizations")
+      .insert({ name: "Kredit teszt iroda", type: "individual", slug: `kredit-teszt-${Date.now()}`, plan: "pro", ai_credit_balance: 10, ai_credit_monthly: 50, ai_credit_period_granted: 50 })
+      .select("id")
+      .single();
+    try {
+      const id = org!.id;
+      const ref = crypto.randomUUID();
+      const first = await admin.rpc("grant_credits", { p_org: id, p_amount: 200, p_reason: "purchase", p_ref_id: ref });
+      const second = await admin.rpc("grant_credits", { p_org: id, p_amount: 200, p_reason: "purchase", p_ref_id: ref });
+      expect([first.data, second.data]).toEqual([true, false]);
+
+      const tooMuch = await admin.rpc("spend_credits", { p_org: id, p_amount: 9999, p_feature: "ai.listing_writer", p_user: null as never });
+      expect(tooMuch.error?.message).toBe("insufficient_credits");
+
+      const spendRef = crypto.randomUUID();
+      const a = await admin.rpc("spend_credits", { p_org: id, p_amount: 30, p_feature: "ai.listing_writer", p_user: null as never, p_ref_id: spendRef });
+      const b = await admin.rpc("spend_credits", { p_org: id, p_amount: 30, p_feature: "ai.listing_writer", p_user: null as never, p_ref_id: spendRef });
+      expect(a.data![0].replayed).toBe(false);
+      expect(b.data![0].replayed).toBe(true);
+      // Előbb a havi zseb fogy (10), a maradék a vásárolt zsebből.
+      expect(a.data![0]).toMatchObject({ monthly_left: 0, purchased_left: 180 });
+    } finally {
+      await admin.from("organizations").delete().eq("id", org!.id);
+    }
   });
 });

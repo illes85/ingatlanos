@@ -49,6 +49,10 @@ export type BillingEvent =
       status: "active" | "past_due" | "canceled" | "incomplete";
       cancelAtPeriodEnd: boolean;
       periodEnd: string | null;
+      /** Csomagváltáskor a metaadatból; egyébként hiányzik. */
+      plan?: PaidPlan;
+      interval?: BillingInterval;
+      seats?: number;
     }
   | { type: "subscription.ended"; eventId: string; subscriptionId: string }
   | { type: "credits.purchased"; eventId: string; organizationId: string; packId: CreditPackId }
@@ -57,6 +61,8 @@ export type BillingEvent =
 export interface BillingProvider {
   readonly mode: BillingMode;
   createCheckout(ctx: CheckoutContext, request: CheckoutRequest): Promise<CheckoutResult>;
+  /** Meglévő előfizetés csomagjának módosítása (arányosított elszámolással); a végleges állapotot a webhook hozza. */
+  changeSubscription(subscriptionId: string, request: Extract<CheckoutRequest, { kind: "subscription" }>): Promise<void>;
   /** Az időszak végén lépjen életbe a lemondás (D-039). */
   cancelAtPeriodEnd(subscriptionId: string): Promise<void>;
   /** Aláírás-ellenőrzés + normalizálás. Érvénytelen aláírásnál kivételt dob. */

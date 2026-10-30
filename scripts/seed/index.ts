@@ -7,6 +7,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../src/types/database";
 import { DEMO_ORG_NAME } from "../../src/config/demo";
+import { detUuid } from "../../src/lib/billing/ids";
 import { createClock, createRandom } from "./lib";
 import { SOLO_AGENT, STAFF, type AgentKey } from "./data/people";
 import { seedBuyerDeals, seedContacts, seedProperties, seedSearchProfiles, seedSellerDeals, insert, type SeedContext } from "./steps/core";
@@ -57,12 +58,30 @@ async function createOrg(name: string, type: "office" | "individual", plan: Data
       plan,
       trial_plan: type === "office" ? "pro_ai" : null,
       trial_ends_at: type === "office" ? clock.daysAhead(11).toISOString() : null,
-      ai_credit_balance: type === "office" ? 312 : 50,
+      // Az iroda a próbaidő 400 kreditjével indul, ebből a seed alább (spend_credits) fogyaszt el 88-at.
+      ai_credit_balance: type === "office" ? 400 : 50,
       ai_credit_monthly: type === "office" ? 10 : 50,
+      ai_credit_period_granted: type === "office" ? 400 : 50,
       is_demo: true,
     },
   ]);
-  return org!.id;
+  const id = org!.id;
+  await insert(admin, "credit_ledger", [
+    {
+      organization_id: id,
+      delta: type === "office" ? 400 : 50,
+      reason: type === "office" ? "trial_grant" : "opening_balance",
+      ref_id: detUuid(`${type === "office" ? "trial" : "opening"}:${id}`),
+    },
+  ]);
+  if (type === "office") {
+    // Valószerű kreditfogyás a naplóban (MOCK AI-hívások): 4 + 30 + 24 + 30 = 88 → 312 marad.
+    for (const [feature, credits] of [["ai.listing_writer", 4], ["ai.valuation_report", 30], ["ai.lead_scoring", 24], ["ai.voice_notes", 30]] as const) {
+      const { error } = await admin.rpc("spend_credits", { p_org: id, p_amount: credits, p_feature: feature, p_user: null as never, p_is_mock: true });
+      if (error) throw new Error(`Kreditfogyás (${feature}): ${error.message}`);
+    }
+  }
+  return id;
 }
 
 async function main() {
@@ -118,6 +137,9 @@ async function main() {
 
 async function seedSoloOrg(clock: ReturnType<typeof createClock>) {
   const orgId = await createOrg(SOLO_AGENT.orgName, "individual", "pro", clock);
+  // Mock előfizetés a Pro csomaghoz, hogy a számlázási felület valós adatot mutasson.
+  const { error: subError } = await admin.rpc("apply_plan_change", { p_org: orgId, p_plan: "pro", p_interval: "month", p_seats: 1, p_status: "active", p_provider: "mock" });
+  if (subError) throw new Error(`Előfizetés: ${subError.message}`);
   const userId = await createUser(SOLO_AGENT.email, SOLO_AGENT.name);
   await admin.from("profiles").update({ active_organization_id: orgId, monthly_commission_goal: 1_500_000 }).eq("id", userId);
   await insert(admin, "memberships", [{ organization_id: orgId, user_id: userId, role: "owner" }]);

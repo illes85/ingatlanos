@@ -157,7 +157,7 @@ export function DealsBoard({ side, deals, canCreate }: { side: DealSide; deals: 
       applyMove({ id, stage: target });
       const result = await moveDeal(id, target);
       if (!result.ok) {
-        toast.error(t("moveFailed"));
+        toast.error(result.error === "planLimit" ? t("planLimit") : t("moveFailed"));
         return;
       }
       toast(t("moved", { stage: tStage(target) }));

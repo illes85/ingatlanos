@@ -14,7 +14,7 @@ export interface DealFormState {
   error?: "generic" | "forbidden";
 }
 
-export type DealResult = { ok: true } | { ok: false; error: "generic" | "forbidden" };
+export type DealResult = { ok: true } | { ok: false; error: "generic" | "forbidden" | "planLimit" };
 
 /** Új ügylet. Az ügynök a saját nevére veszi fel; az owner kijelölhet felelőst. A hivatkozásokat adatbázis-trigger őrzi. */
 export async function createDeal(_: DealFormState, formData: FormData): Promise<DealFormState> {
@@ -57,6 +57,7 @@ export async function moveDeal(dealId: string, stage: DealStage): Promise<DealRe
   if (!(STAGES_BY_SIDE[deal.side] as readonly string[]).includes(stage)) return { ok: false, error: "generic" };
 
   const { data, error } = await supabase.from("deals").update({ stage }).eq("id", dealId).eq("organization_id", ctx.organization.id).select("id");
+  if (error?.message === "plan_limit_reached") return { ok: false, error: "planLimit" };
   if (error || !data || data.length === 0) return { ok: false, error: "forbidden" };
   revalidatePath("/ugyletek");
   return { ok: true };

@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 export type MemberRole = "owner" | "agent" | "assistant";
 export type PlanTier = "start" | "pro" | "pro_ai" | "office";
@@ -20,6 +20,8 @@ export interface AppContext {
     trialEndsAt: string | null;
     aiCreditBalance: number;
     aiCreditMonthly: number;
+    /** Vásárolt kredit: nem jár le (D-038). */
+    aiCreditPurchased: number;
     isDemo: boolean;
   };
   role: MemberRole;
@@ -52,7 +54,7 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
   const { data: memberships } = await supabase
     .from("memberships")
     .select(
-      "role, organization:organizations (id, name, type, plan, trial_plan, trial_ends_at, ai_credit_balance, ai_credit_monthly, is_demo)",
+      "role, organization:organizations (id, name, type, plan, trial_plan, trial_ends_at, ai_credit_balance, ai_credit_monthly, ai_credit_purchased, is_demo)",
     )
     .eq("user_id", userId)
     .eq("status", "active");
@@ -60,8 +62,19 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
   if (!memberships || memberships.length === 0) return "no-org";
 
   const active = memberships.find((m) => m.organization?.id === profile?.active_organization_id) ?? memberships[0];
-  const org = active.organization;
+  let org = active.organization;
   if (!org) return "no-org";
+
+  // Lusta havi kredit-jóváírás és lejárt próba/mock időszak lezárása (D-038). Csak szerveroldali függvény végzi;
+  // ha történt változás, a friss értékeket az RLS alatt olvassuk újra.
+  if (await settleBilling(org.id)) {
+    const { data: fresh } = await supabase
+      .from("organizations")
+      .select("id, name, type, plan, trial_plan, trial_ends_at, ai_credit_balance, ai_credit_monthly, ai_credit_purchased, is_demo")
+      .eq("id", org.id)
+      .single();
+    if (fresh) org = fresh;
+  }
   const trialActive = Boolean(org.trial_plan && org.trial_ends_at && new Date(org.trial_ends_at) > new Date());
 
   return {
@@ -78,12 +91,23 @@ export const getAppContext = cache(async (): Promise<AppContext | null | "no-org
       trialEndsAt: org.trial_ends_at,
       aiCreditBalance: org.ai_credit_balance,
       aiCreditMonthly: org.ai_credit_monthly,
+      aiCreditPurchased: org.ai_credit_purchased,
       isDemo: org.is_demo,
     },
     role: active.role,
     effectivePlan: trialActive && org.trial_plan ? org.trial_plan : org.plan,
   };
 });
+
+/** Esedékes időszakzárás kérése a szervertől. Hiba esetén (pl. nincs service-kulcs) az oldal enélkül is működik. */
+async function settleBilling(organizationId: string): Promise<boolean> {
+  try {
+    const { data } = await createAdminClient().rpc("grant_monthly_credits_if_due", { p_org: organizationId });
+    return data === true;
+  } catch {
+    return false;
+  }
+}
 
 /** Védett oldalakhoz: bejelentkezés és szervezet nélkül átirányít. */
 export async function requireAppContext(): Promise<AppContext> {

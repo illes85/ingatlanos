@@ -120,11 +120,13 @@ export interface LockedFeatureProps {
   body: React.ReactNode;
   ctaLabel: string;
   onCta?: () => void;
+  /** Ha megvan, a gomb ide navigál (szerverkomponensből ezt használd). */
+  ctaHref?: string;
   className?: string;
 }
 
 /** Zárolt prémium funkció: elmosott előnézet + értékígéret + „Kipróbálom 14 napig”. */
-export function LockedFeature({ preview, planLabel, title, body, ctaLabel, onCta, className }: LockedFeatureProps) {
+export function LockedFeature({ preview, planLabel, title, body, ctaLabel, onCta, ctaHref, className }: LockedFeatureProps) {
   return (
     <div className={cn("relative min-h-[300px] overflow-hidden rounded-panel border border-line-card bg-bg", className)}>
       <div aria-hidden="true" inert className="pointer-events-none absolute inset-0 opacity-70 blur-[5px] select-none">
@@ -134,9 +136,15 @@ export function LockedFeature({ preview, planLabel, title, body, ctaLabel, onCta
         <span className="text-12 font-bold text-accent-text">{planLabel}</span>
         <span className="text-15 font-bold">{title}</span>
         <span className="text-13 leading-normal text-ink-3">{body}</span>
-        <Button variant="inverse" onClick={onCta}>
-          {ctaLabel}
-        </Button>
+        {ctaHref ? (
+          <Button variant="inverse" asChild>
+            <a href={ctaHref}>{ctaLabel}</a>
+          </Button>
+        ) : (
+          <Button variant="inverse" onClick={onCta}>
+            {ctaLabel}
+          </Button>
+        )}
       </div>
     </div>
   );

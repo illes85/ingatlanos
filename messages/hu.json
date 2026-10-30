@@ -606,7 +606,9 @@
         "choice": "Válassz a listából.",
         "range": "Az érték a megengedett tartományon kívül esik.",
         "generic": "Nem sikerült menteni. Próbáld újra egy perc múlva.",
-        "forbidden": "Ehhez az ingatlanhoz nincs módosítási jogosultságod."
+        "forbidden": "Ehhez az ingatlanhoz nincs módosítási jogosultságod.",
+        "planLimit": "Elérted a csomagod aktív ingatlan-limitjét. Válts csomagot, vagy tedd inaktívvá egy meglévőt.",
+        "planLimitCta": "Csomagváltás"
       },
       "newBanner": "Az ingatlan felvéve. Töltsd fel a fotókat, majd nézd meg az adatlapot.",
       "toDetail": "Tovább az adatlapra",
@@ -1158,6 +1160,7 @@
     "confirmClose": "Lezárod az ügyletet? Megnyertként kerül a Lezárva oszlopba, az ingatlan pedig eladott lesz.",
     "moved": "Áthelyezve: {stage}",
     "moveFailed": "Az áthelyezés nem sikerült. Ehhez az ügylethez nincs jogosultságod, vagy hiba történt.",
+    "planLimit": "Az ingatlan hirdetése átlépné a csomagod aktív ingatlan-limitjét. Válts csomagot a Csomagok oldalon.",
     "form": {
       "titleNew": "Új ügylet",
       "subtitleSeller": "Eladói oldal: egy megbízás megszerzésétől az adásvételig.",
@@ -1453,5 +1456,118 @@
     "markAll": "Mind olvasott",
     "empty": "Nincs új értesítésed.",
     "labelUnread": "Értesítések, {count} olvasatlan"
+  },
+  "features": {
+    "ai_listing_writer": "AI hirdetésszöveg-író",
+    "ai_buyer_matching": "Vevő–ingatlan párosítás",
+    "ai_buyer_matching_reasons": "Párosítás AI indoklással",
+    "ai_valuation_report": "AI értékbecslő riport (PDF)",
+    "ai_listing_presentation": "Megbízásszerző prezentáció",
+    "ai_lead_scoring": "Lead-pontozás, „Ma kit hívj”",
+    "ai_call_list": "„Ma kit hívj” lista",
+    "ai_voice_notes": "Hangjegyzet → CRM",
+    "ai_followup_sequences": "AI utókövetési szekvenciák",
+    "ai_assistant": "Kulcs Asszisztens",
+    "office_analytics": "Teljesítmény-analitika",
+    "office_commission_rules": "Jutalékszabályok",
+    "office_lead_routing": "Lead-elosztás",
+    "office_pmt": "Pmt. megfelelőség",
+    "branding_custom": "Saját márka a nyilvános oldalon"
+  },
+  "gate": {
+    "title": "Zárolt prémium funkció",
+    "body": "A(z) {feature} a(z) {plan} csomagtól érhető el. A csomagváltás után azonnal megnyílik.",
+    "cta": "Csomagok megtekintése",
+    "ctaTrial": "Kipróbálom 14 napig",
+    "needPlan": "A(z) {feature} funkcióhoz {plan} csomag szükséges."
+  },
+  "billing": {
+    "title": "Csomagok és számlázás",
+    "lead": "Válaszd ki az irodádhoz illő csomagot. A váltás azonnal érvényesül, és bármikor lemondható.",
+    "intervalLabel": "Fizetési időszak",
+    "month": "Havi",
+    "year": "Éves",
+    "yearBadge": "−20%",
+    "perMonth": "/ hó",
+    "billedYearly": "évente számlázva: {amount} + ÁFA",
+    "free": "Ingyenes",
+    "netLabel": "nettó",
+    "vatNote": "+ 27% ÁFA ({gross} bruttó / {period})",
+    "periodMonth": "hó",
+    "periodYear": "év",
+    "officeFormula": "{platform} platformdíj + {perSeat} / fő",
+    "seats": "Munkatársak száma",
+    "seatsHint": "A díj a munkatársak számától függ; a kredit fejenként jár.",
+    "choose": "Ezt választom",
+    "current": "Jelenlegi csomag",
+    "update": "Módosítás (időszak, létszám)",
+    "ownerOnly": "A csomagot az irodavezető (owner) módosíthatja.",
+    "creditsPerMonth": "{count} AI kredit / hó",
+    "creditsPerSeat": "{count} AI kredit / fő / hó",
+    "listings": "{count} aktív ingatlan",
+    "listingsUnlimited": "Korlátlan aktív ingatlan",
+    "everythingBasic": "Minden alapfunkció",
+    "brandStart": "Megosztható oldal Kulcs-márkával",
+    "brandOwn": "Megosztható oldal saját márkával",
+    "plan": {
+      "start": "Alap CRM kezdőknek",
+      "pro": "Korlátlan ingatlan, vevőpárosítás",
+      "pro_ai": "Teljes AI-eszköztár egy ügynöknek",
+      "office": "Irodának: AI és irodavezetői funkciók"
+    },
+    "status": {
+      "title": "Jelenlegi csomagod",
+      "trial": "{plan} próbaidő · még {count, plural, =0 {kevesebb mint egy nap} other {# nap}}",
+      "trialEnd": "A próba végén automatikusan a Start csomagra váltasz, nem kérünk bankkártyát.",
+      "active": "{plan} csomag",
+      "renews": "Következő számlázás: {date}",
+      "canceling": "Lemondva: a csomagod {date}-ig aktív marad, utána a Start csomagra váltasz.",
+      "cancel": "Előfizetés lemondása",
+      "cancelConfirm": "Biztosan lemondod? A csomag az időszak végéig használható marad.",
+      "cancelYes": "Igen, lemondom",
+      "cancelNo": "Mégsem",
+      "mockNotice": "Teszt mód: nincs valódi fizetés. A csomagváltás azonnal, szimulálva történik.",
+      "limitUsed": "Aktív ingatlan: {used} / {limit}",
+      "limitOver": "A Start csomagban {limit} aktív ingatlan lehet. A meglévők megmaradnak, új hirdetés csak a limit alatt aktiválható."
+    },
+    "result": {
+      "success": "Köszönjük! A csomagod frissült.",
+      "cancelled": "A fizetés megszakadt, semmit nem terheltünk.",
+      "error": "Nem sikerült a művelet. Próbáld újra később.",
+      "creditsAdded": "A kredit jóváírva.",
+      "canceled": "Az előfizetés lemondva az időszak végére."
+    },
+    "credits": {
+      "title": "AI kredit",
+      "monthly": "Havi keret",
+      "purchased": "Vásárolt kredit",
+      "monthlyHint": "A havi keret hónap végén lejár, a vásárolt kredit nem.",
+      "total": "{count} kredit",
+      "buy": "Kredit vásárlása",
+      "pack": "{credits} kredit",
+      "packPrice": "{net} + ÁFA",
+      "buyCta": "Vásárlás",
+      "history": "Kreditmozgások",
+      "empty": "Még nincs kreditmozgás.",
+      "ownerOnlyHistory": "A kreditmozgásokat az irodavezető látja.",
+      "reason": {
+        "opening_balance": "Nyitó egyenleg",
+        "trial_grant": "Próbaidő jóváírása",
+        "trial_expire": "Próba maradék kreditje lejárt",
+        "monthly_grant": "Havi keret jóváírva",
+        "monthly_expire": "Havi keret maradéka lejárt",
+        "plan_change_grant": "Csomagváltás: kiegészítés",
+        "plan_change_expire": "Csomagváltás: keret igazítva",
+        "purchase": "Kreditvásárlás",
+        "purchase_refund": "Kreditvásárlás visszatérítve",
+        "adjustment": "Korrekció",
+        "ai_usage": "AI használat",
+        "ai_refund": "AI visszatérítés"
+      }
+    },
+    "limit": {
+      "reached": "Elérted a Start csomag {limit} aktív ingatlanos limitjét. Válts csomagot, vagy tedd inaktívvá egy meglévőt.",
+      "cta": "Csomagváltás"
+    }
   }
 }

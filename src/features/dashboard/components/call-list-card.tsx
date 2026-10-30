@@ -51,6 +51,7 @@ export async function CallListCard({ callList, compact = false }: { callList: Da
             title={t("lockedTitle")}
             body={t("lockedBody")}
             ctaLabel={t("lockedCta")}
+            ctaHref="/csomagok"
           />
         </div>
       ) : (
