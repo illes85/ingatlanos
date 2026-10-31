@@ -1151,7 +1151,7 @@ describe("csomagok, kredit és fizetés (D-037…D-040)", () => {
     expect(audit.data ?? []).toHaveLength(0);
   });
 
-  it("felhasználónként egyetlen próba: a második szervezet Starton indul, a trial_claims kliensről nem érhető el (D-041)", async () => {
+  it("felhasználónként egyetlen próba, szervezetszám-korlát, a trial_claims kliensről semmilyen úton nem érhető el (D-041)", async () => {
     const admin = svc();
     const email = `trial-${Date.now()}@kulcs-demo.test`;
     const { data: created } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
@@ -1159,21 +1159,47 @@ describe("csomagok, kredit és fizetés (D-037…D-040)", () => {
     const { client } = await signIn(email);
     const orgIds: string[] = [];
     try {
-      const first = await client.rpc("create_organization", { p_name: "Próba teszt egy", p_type: "individual" });
-      const second = await client.rpc("create_organization", { p_name: "Próba teszt kettő", p_type: "individual" });
+      expect((await client.rpc("my_trial_available")).data).toBe(true);
+
+      // Párhuzamos hívás: pontosan egy szervezet kaphat próbát.
+      const [first, second] = await Promise.all([
+        client.rpc("create_organization", { p_name: "Próba teszt egy", p_type: "individual" }),
+        client.rpc("create_organization", { p_name: "Próba teszt kettő", p_type: "individual" }),
+      ]);
       expect(first.error).toBeNull();
       expect(second.error).toBeNull();
       orgIds.push(first.data!, second.data!);
-      const { data: orgs } = await admin.from("organizations").select("id, trial_plan, ai_credit_balance, plan").in("id", orgIds);
-      const a = orgs!.find((o) => o.id === first.data)!;
-      const b = orgs!.find((o) => o.id === second.data)!;
-      expect(a).toMatchObject({ trial_plan: "pro_ai", ai_credit_balance: 400 });
-      expect(b).toMatchObject({ trial_plan: null, ai_credit_balance: 10, plan: "start" });
-      const claims = await client.from("trial_claims" as never).select("*");
-      expect(claims.error).not.toBeNull();
+      const { data: orgs } = await admin.from("organizations").select("id, trial_plan, ai_credit_balance, ai_credit_purchased, plan").in("id", orgIds);
+      expect(orgs!.filter((o) => o.trial_plan === "pro_ai")).toHaveLength(1);
+      const noTrial = orgs!.find((o) => o.trial_plan === null)!;
+      expect(noTrial).toMatchObject({ ai_credit_balance: 10, plan: "start" });
+      expect((await client.rpc("my_trial_available")).data).toBe(false);
+
+      // A próba nélküli szervezeten a lusta havi jóváírás nem ír dupla, és a napló egyezik az egyenleggel.
+      expect((await admin.rpc("grant_monthly_credits_if_due", { p_org: noTrial.id })).data).toBe(false);
+      const { data: ledger } = await admin.from("credit_ledger").select("delta, reason").eq("organization_id", noTrial.id);
+      expect(ledger!.filter((l) => l.reason === "monthly_grant")).toHaveLength(1);
+      expect(ledger!.reduce((sum, l) => sum + l.delta, 0)).toBe(noTrial.ai_credit_balance + noTrial.ai_credit_purchased);
+
+      // Legfeljebb 3 szervezet.
+      const third = await client.rpc("create_organization", { p_name: "Próba teszt három", p_type: "individual" });
+      expect(third.error).toBeNull();
+      orgIds.push(third.data!);
+      const fourth = await client.rpc("create_organization", { p_name: "Próba teszt négy", p_type: "individual" });
+      expect(fourth.error?.message).toBe("org_limit");
+
+      // A trial_claims kliensről (bejelentkezve és névtelenül) semmilyen művelettel nem érhető el: jogosultsági hiba (42501).
+      for (const c of [client, anon]) {
+        const t = c.from("trial_claims" as never);
+        expect((await t.select("*")).error?.code).toBe("42501");
+        expect((await t.insert({ user_id: userId } as never)).error?.code).toBe("42501");
+        expect((await t.update({ claimed_at: new Date().toISOString() } as never).eq("user_id", userId)).error?.code).toBe("42501");
+        expect((await t.delete().eq("user_id", userId)).error?.code).toBe("42501");
+      }
     } finally {
       if (orgIds.length) await admin.from("organizations").delete().in("id", orgIds);
       await admin.auth.admin.deleteUser(userId);
+      await admin.from("trial_claims" as never).delete().eq("user_id", userId);
     }
   });
 });

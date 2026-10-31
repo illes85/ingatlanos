@@ -141,7 +141,8 @@
     "namePlaceholderIndividual": "pl. Kiss Anna ingatlan",
     "namePlaceholderOffice": "pl. Kapu Ingatlaniroda",
     "submit": "Kezdjük",
-    "trialNote": "A 14 napos Pro AI próbaidő azonnal elindul."
+    "trialNote": "A 14 napos Pro AI próbaidő azonnal elindul.",
+    "noTrialNote": "A próbaidődet már felhasználtad: a szervezet Start csomagon indul, havi 10 AI-kredittel."
   },
   "dashboard": {
     "greeting": {

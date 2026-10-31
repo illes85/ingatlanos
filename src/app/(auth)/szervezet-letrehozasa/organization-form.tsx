@@ -10,7 +10,7 @@ import { createOrganization, type AuthFormState } from "../actions";
 
 type OrgType = "individual" | "office";
 
-export function OrganizationForm() {
+export function OrganizationForm({ trialAvailable }: { trialAvailable: boolean }) {
   const t = useTranslations();
   const [type, setType] = React.useState<OrgType>("individual");
   const [state, action, pending] = React.useActionState<AuthFormState, FormData>(createOrganization, {});
@@ -60,7 +60,7 @@ export function OrganizationForm() {
       <Button type="submit" size="lg" disabled={pending}>
         {t("onboarding.submit")}
       </Button>
-      <p className="text-center text-13 text-muted">{t("onboarding.trialNote")}</p>
+      <p className="text-center text-13 text-muted">{trialAvailable ? t("onboarding.trialNote") : t("onboarding.noTrialNote")}</p>
     </form>
   );
 }

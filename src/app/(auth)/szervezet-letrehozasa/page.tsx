@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getAppContext } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import { OrganizationForm } from "./organization-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,13 +17,14 @@ export default async function CreateOrganizationPage() {
   if (ctx !== "no-org") redirect("/ma");
 
   const t = await getTranslations("onboarding");
+  const { data: trialAvailable } = await (await createClient()).rpc("my_trial_available");
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1.5">
         <h1 className="serif text-38 leading-tight font-medium">{t("title")}</h1>
         <p className="text-15 text-muted">{t("subtitle")}</p>
       </div>
-      <OrganizationForm />
+      <OrganizationForm trialAvailable={trialAvailable === true} />
     </div>
   );
 }

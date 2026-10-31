@@ -2184,6 +2184,7 @@ export type Database = {
         Returns: boolean
       }
       grant_monthly_credits_if_due: { Args: { p_org: string }; Returns: boolean }
+      my_trial_available: { Args: never; Returns: boolean }
       spend_credits: {
         Args: {
           p_amount: number
